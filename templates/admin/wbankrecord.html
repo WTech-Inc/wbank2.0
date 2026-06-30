@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>WBank -- 用戶流水</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      #wbank-admin-menu {
+        background-color: rgb(0,0,255);
+        color: rgb(255,255,255);
+        display: flex;
+        font-size: 67%;
+        margin-right: 52%;
+      }
+      .alink-list {
+        padding-bottom: 30%;
+      }
+    </style>
+</head>
+<body>
+
+<div id="wbank-admin-menu">
+    <p id="wbank-admin-alink-home" class="alink-list">首頁</p>
+    <p id="wbank-admin-alink-this" class="alink-list">銀行流水</p>
+    <p id="wbank-admin-alink-users" class="alink-list">用戶表</p>
+    <p id="wbank-admin-alink-kyc" class="alink-list">KYC表</p>
+</div>
+<br>
+
+<div class="container mt-4">
+    <h1>查詢 WBankRecord</h1>
+    <form id="queryForm" class="form-inline mb-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="text" class="form-control mr-2" id="username" placeholder="用戶名" required>
+        <button type="submit" class="btn btn-primary">查詢</button>
+        <a href="{{ url_for('wbankrecordview.export_data') }}" class="btn btn-success ml-2">導出 CSV</a>
+    </form>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>用戶名</th>
+                <th>事件</th>
+                <th>時間 <button id="sortAsc" class="btn btn-link">↑</button> <button id="sortDesc" class="btn btn-link">↓</button></th>
+            </tr>
+        </thead>
+        <tbody id="results"></tbody>
+    </table>
+</div>
+
+<script>
+    $('#queryForm').submit(function(event) {
+        event.preventDefault();
+        const username = $('#username').val();
+        
+        $.post('/admin/wbankrecordview/execute_query', { username: username, csrf_token: $('input[name="csrf_token"]').val()  /* 添加 CSRF 令牌*/ }, function(data) {
+            let resultsHtml = '';
+            data.forEach(record => {
+                resultsHtml += `<tr>
+                    <td>${record.username}</td>
+                    <td>${record.action}</td>
+                    <td>${new Date(record.time).toLocaleString()}</td>
+                </tr>`;
+            });
+            $('#results').html(resultsHtml);
+        });
+    });
+
+    function sortResults(order) {
+        const rows = $('#results tr').get();
+        rows.sort(function(a, b) {
+            const keyA = new Date($(a).children('td').eq(3).text()).getTime();
+            const keyB = new Date($(b).children('td').eq(3).text()).getTime();
+            return order === 'asc' ? keyA - keyB : keyB - keyA;
+        });
+        $.each(rows, function(index, row) {
+            $('#results').append(row);
+        });
+    }
+
+    $('#sortAsc').click(function() {
+        sortResults('asc');
+    });
+
+    $('#sortDesc').click(function() {
+        sortResults('desc');
+    });
+    $('wbank-admin-alink-home').click(()=>{
+      window.location.href="/admin";
+    });
+    $('wbank-admin-alink-this').click(()=>{
+      window.location.reload();
+    });
+    $('wbank-admin-alink-users').click(()=>{
+      window.location.href="/admin/wbankwallet";
+    });
+    $('wbank-admin-alink-kyc').click(()=>{
+      window.location.href="/admin/wbankkyc";
+    });
+</script>
+
+</body>
+</html>

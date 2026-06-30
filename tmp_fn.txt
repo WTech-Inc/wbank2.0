@@ -1,0 +1,60 @@
+
+function loadWCoinsInfo() {
+    try {
+        var r = fetch('/wcoins/api/address');
+        var d = r.json();
+        if (d.address) {
+            document.getElementById('wcoins-balance').textContent = d.balance;
+            document.getElementById('wcoins-address').textContent = d.address;
+            document.getElementById('wcoins-receive-addr').textContent = d.address;
+            // Generate QR code
+            if (!wcoinsQrLoaded) {
+                loadWCoinsQR(d.address);
+                wcoinsQrLoaded = true;
+            }
+        }
+    } catch(e) { console.log('WCoins error:', e); }
+    // Load ETH address
+    try {
+        var re = fetch('/wcoins/api/eth_address');
+        var de = re.json();
+        if (de.eth_address) {
+            document.getElementById('wcoins-eth-address').textContent = de.eth_address;
+            document.getElementById('wcoins-receive-eth').textContent = de.eth_address;
+        }
+    } catch(e) { console.log('ETH address error:', e); }
+    
+    try {
+        var r2 = fetch('/wcoins/api/history');
+        var txns = r2.json();
+        var container = document.getElementById('wcoins-tx-history');
+        if (!container) return;
+        var list = txns.transactions || [];
+        if (list.length === 0) {
+            container.innerHTML = 'No transactions';
+        } else {
+            var html = '';
+            for (var i = 0; i < list.length; i++) {
+                var tx = list[i];
+                var icon = tx.type === 'sent' ? '↗️' : '↙️';
+                var color = tx.type === 'sent' ? '#ef4444' : '#4ade80';
+                var other = tx.type === 'sent' ? tx.receiver : tx.sender;
+                html += '<div style="padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:12px;display:flex;justify-content:space-between;align-items:center;">';
+                html += '<div><span>' + icon + '</span> <b>' + tx.amount + '</b> WCoins<br>';
+                html += '<span style="color:#94a3b8;">' + tx.type + ' to/from ' + other + '</span></div>';
+                html += '<div style="text-align:right;"><span style="color:' + color + ';">#' + tx.block_index + '</span><br>';
+                html += '<span style="color:#94a3b8;font-size:10px;">' + (tx.created_at || '') + '</span></div></div>';
+            }
+            container.innerHTML = html;
+        }
+    } catch(e) { console.log('WCoins history error:', e); }
+}
+
+function loadWCoinsQR(address) {
+    var img = document.getElementById('wcoins-qr');
+    if (!img) return;
+    // Use a QR API to generate
+    img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=' + encodeURIComponent('wcoins:' + address);
+    img.onerror = function() {
+        // Fallback: simple canvas QR
+        this.style.display = 'none';

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBank — 賬戶註冊及認證</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter','Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;min-height:100vh}
+        .container{max-width:720px;margin:0 auto;padding:24px}
+        .header{text-align:center;padding:24px 0 8px}
+        .header h1{font-size:22px;font-weight:700;color:#1a1a2e}
+        .header .sub{font-size:13px;color:#64748b;margin-top:4px}
+        .header .logo{font-size:14px;font-weight:600;color:#4fc3f7;letter-spacing:1px;margin-bottom:8px}
+        .progress-bar{display:flex;justify-content:space-between;margin:24px 0 32px;position:relative}
+        .progress-bar::before{content:'';position:absolute;top:14px;left:40px;right:40px;height:2px;background:#e2e8f0;z-index:0}
+        .progress-bar .step{text-align:center;position:relative;z-index:1}
+        .progress-bar .step .circle{width:28px;height:28px;border-radius:50%;background:#e2e8f0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#94a3b8;margin:0 auto 6px;transition:all .3s}
+        .progress-bar .step.active .circle{background:#4fc3f7;color:#fff;box-shadow:0 2px 8px rgba(79,195,247,0.3)}
+        .progress-bar .step.done .circle{background:#10b981;color:#fff}
+        .progress-bar .step .label{font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+        .progress-bar .step.active .label{color:#1a1a2e;font-weight:600}
+        .step-content{display:none}
+        .step-content.active{display:block}
+        .form-card{background:#fff;border-radius:10px;padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px}
+        .form-card h2{font-size:17px;font-weight:600;margin-bottom:4px}
+        .form-card .desc{font-size:13px;color:#64748b;margin-bottom:20px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+        .form-group{margin-bottom:12px}
+        .form-group label{display:block;font-size:12px;font-weight:500;color:#475569;margin-bottom:4px}
+        .form-group input,.form-group select{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;font-family:inherit;color:#1a1a2e;background:#fff;transition:border-color .2s}
+        .form-group input:focus,.form-group select:focus{outline:none;border-color:#4fc3f7;box-shadow:0 0 0 3px rgba(79,195,247,0.1)}
+        .form-group input.error{border-color:#ef4444}
+        .form-group .hint{font-size:11px;color:#94a3b8;margin-top:3px}
+        .form-group .error-msg{font-size:11px;color:#ef4444;margin-top:3px;display:none}
+        .full{grid-column:1/-1}
+        .checkbox-group{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:16px;margin-bottom:10px}
+        .checkbox-group label{display:flex;gap:10px;font-size:13px;color:#475569;cursor:pointer}
+        .checkbox-group input[type=checkbox]{margin-top:2px;width:16px;height:16px;accent-color:#4fc3f7;flex-shrink:0}
+        .legal-text{background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:14px;font-size:12px;color:#64748b;line-height:1.7;max-height:200px;overflow-y:auto;margin-bottom:10px}
+        .legal-text strong{color:#1a1a2e}
+        .btn-row{display:flex;gap:10px;margin-top:20px}
+        .btn{flex:1;padding:11px;border:none;border-radius:6px;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit;transition:all .2s}
+        .btn-primary{background:#4fc3f7;color:#fff}
+        .btn-primary:hover{background:#38b2e0}
+        .btn-secondary{background:#e2e8f0;color:#475569}
+        .btn-secondary:hover{background:#cbd5e1}
+        .btn:disabled{opacity:.5;cursor:not-allowed}
+        .loading-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.92);z-index:100;justify-content:center;align-items:center;flex-direction:column}
+        .loading-overlay.show{display:flex}
+        .spinner{width:48px;height:48px;border:3px solid #e2e8f0;border-top-color:#4fc3f7;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .loading-overlay h3{font-size:16px;font-weight:600;margin-top:20px;color:#1a1a2e}
+        .loading-overlay p{font-size:13px;color:#64748b;margin-top:6px}
+        .loading-overlay .progress-track{width:200px;height:4px;background:#e2e8f0;border-radius:2px;margin-top:16px;overflow:hidden}
+        .loading-overlay .progress-track .fill{height:100%;background:linear-gradient(90deg,#4fc3f7,#10b981);border-radius:2px;width:0%;transition:width .5s}
+        .done-screen{display:none;text-align:center;padding:48px 24px}
+        .done-screen.show{display:block}
+        .done-screen .icon{font-size:48px;margin-bottom:16px}
+        .done-screen h2{font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+        .done-screen p{font-size:14px;color:#64748b;line-height:1.6;max-width:400px;margin:0 auto}
+        .done-screen .btn{margin-top:24px;display:inline-block;padding:12px 32px;width:auto}
+        @media(max-width:600px){.form-row{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <h3>正在審核中</h3>
+    <p>請勿關閉此頁面，系統正在自動處理您的申請</p>
+    <div class="progress-track"><div class="fill" id="progressFill"></div></div>
+</div>
+
+<div class="container">
+    <div class="header">
+        <div class="logo">WBank</div>
+        <h1>開設賬戶</h1>
+        <p class="sub">完成以下步驟即可開立 WBank 賬戶</p>
+    </div>
+
+    <div class="progress-bar" id="progressBar">
+        <div class="step active" data-step="1"><div class="circle">1</div><div class="label">個人資料</div></div>
+        <div class="step" data-step="2"><div class="circle">2</div><div class="label">身份驗證</div></div>
+        <div class="step" data-step="3"><div class="circle">3</div><div class="label">稅務信息</div></div>
+        <div class="step" data-step="4"><div class="circle">4</div><div class="label">條款及聲明</div></div>
+    </div>
+
+    <form id="kycForm" onsubmit="return false;">
+        <!-- Step 1: Personal Info -->
+        <div class="step-content active" data-step="1">
+            <div class="form-card">
+                <h2>個人資料</h2>
+                <p class="desc">請填寫您的真實個人信息，所有資料將受嚴格保密</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>英文姓氏 (Surname)</label>
+                        <input type="text" id="surname" placeholder="CHAN" required>
+                    </div>
+                    <div class="form-group">
+                        <label>英文名字 (Given Name)</label>
+                        <input type="text" id="givenname" placeholder="TAI MAN" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>中文姓名 (如有)</label>
+                    <input type="text" id="cname" placeholder="陳大文">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>出生日期</label>
+                        <input type="date" id="dob" required>
+                    </div>
+                    <div class="form-group">
+                        <label>性別</label>
+                        <select id="gender">
+                            <option value="">請選擇</option>
+                            <option value="M">男</option>
+                            <option value="F">女</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>聯絡電話</label>
+                    <input type="tel" id="phone" placeholder="香港手機號碼 (e.g. 51234567)">
+                </div>
+                <div class="form-group">
+                    <label>電郵地址</label>
+                    <input type="email" id="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label>住宅地址</label>
+                    <input type="text" id="address" placeholder="詳細地址，包括大廈、街道、地區" required>
+                </div>
+            </div>
+            <div class="btn-row">
+                <div></div>
+                <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Step 2: HKID Verification -->
+        <div class="step-content" data-step="2">
+            <div class="form-card">
+                <h2>身份驗證</h2>
+                <p class="desc">請輸入您的香港身份證號碼以進行驗證</p>
+                <div class="form-group">
+                    <label>香港身份證號碼</label>
+                    <input type="text" id="hkid" placeholder="e.g. A123456(7)" style="text-transform:uppercase;font-family:monospace;letter-spacing:1px">
+                    <div class="hint">格式：大寫英文字母 + 6位數字 + 括號檢查位</div>
+                    <div class="error-msg" id="hkidError">身份證號碼格式不正確</div>
+                </div>
+                <div class="form-group">
+                    <label>國籍</label>
+                    <select id="nationality">
+                        <option value="HK">中國（香港）</option>
+                        <option value="CN">中國</option>
+                        <option value="others">其他</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>出生地點</label>
+                    <input type="text" id="birthplace" placeholder="e.g. 香港">
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Tax Info -->
+        <div class="step-content" data-step="3">
+            <div class="form-card">
+                <h2>稅務信息</h2>
+                <p class="desc">根據稅務條例，我們需要收集您的稅務居民資料</p>
+                <div class="form-group">
+                    <label>稅務居民身份</label>
+                    <select id="taxResidence">
+                        <option value="HK">香港稅務居民</option>
+                        <option value="CN">中國內地稅務居民</option>
+                        <option value="other">其他司法管轄區</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>税務編號 (TIN) — 如有</label>
+                    <input type="text" id="tin" placeholder="香港身份證號碼即為稅務編號">
+                    <div class="hint">香港居民：身份證號碼即為稅務編號</div>
+                </div>
+                <div class="form-group">
+                    <label>就業狀況</label>
+                    <select id="employment">
+                        <option value="">請選擇</option>
+                        <option value="employed">受僱</option>
+                        <option value="self">自僱／自由職業</option>
+                        <option value="business">東主／合夥人</option>
+                        <option value="retired">已退休</option>
+                        <option value="student">學生</option>
+                        <option value="others">其他</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>職業</label>
+                        <input type="text" id="occupation" placeholder="e.g. 工程師">
+                    </div>
+                    <div class="form-group">
+                        <label>年收入範圍 (HKD)</label>
+                        <select id="income">
+                            <option value="">請選擇</option>
+                            <option value="0-200k">HK$0 - $200,000</option>
+                            <option value="200k-500k">HK$200,001 - $500,000</option>
+                            <option value="500k-1m">HK$500,001 - $1,000,000</option>
+                            <option value="1m-2m">HK$1,000,001 - $2,000,000</option>
+                            <option value="2m+">HK$2,000,000 以上</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>資金來源</label>
+                    <select id="fundSource">
+                        <option value="">請選擇</option>
+                        <option value="salary">薪資收入</option>
+                        <option value="savings">個人儲蓄</option>
+                        <option value="investment">投資收益</option>
+                        <option value="business">業務收入</option>
+                        <option value="gift">饋贈／家族資助</option>
+                        <option value="others">其他</option>
+                    </select>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                <button class="btn btn-primary" onclick="nextStep()">下一步 →</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Terms & Declaration -->
+        <div class="step-content" data-step="4">
+            <div class="form-card">
+                <h2>條款及聲明</h2>
+                <p class="desc">請仔細閱讀以下條款後確認</p>
+
+                <div class="legal-text">
+                    <strong>重要提示：</strong><br><br>
+                    根據《打擊洗錢及恐怖分子資金籌集條例》（第615章）及<br>
+                    《個人資料（私隱）條例》（第486章），<br><br>
+                    本人確認及聲明：<br><br>
+                    1. 本人提供的所有資料均為真實、準確及完整；<br>
+                    2. 本人明白及同意 WBank 可對本人進行信用審查及身份驗證；<br>
+                    3. 本人同意 WBank 按照私隱政策收集、使用及儲存本人的個人資料；<br>
+                    4. 本人確認賬戶將僅用於合法用途，不會用於任何非法活動；<br>
+                    5. 本人明白如提供虛假資料可能導致法律責任；<br><br>
+                    <strong>合規聲明：</strong><br><br>
+                    根據合規部總監指示，參照《證券及期貨條例》（第571章）及<br>
+                    香港金融管理局相關指引，所有賬戶申請均須通過合規審查。<br>
+                    合規部有權要求申請人提供額外文件以完成盡職審查。<br><br>
+                    <strong>WBank 合規部</strong><br>
+                    合規總監：WTech Compliance Department<br>
+                    參考條例：<br>
+                    • 《打擊洗錢條例》AMLO (Cap.615)<br>
+                    • 《個人資料條例》PDPO (Cap.486)<br>
+                    • 《證券及期貨條例》SFO (Cap.571)<br>
+                    • 香港金融管理局指引 (HKMA Guideline)
+                </div>
+
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="agreeTerms">
+                        <span>本人已細閱、明白並同意以上所有條款及聲明</span>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="agreeCompliance">
+                        <span>本人同意 WBank 合規部進行盡職審查及持續監測</span>
+                    </label>
+                </div>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" id="agreeDeclaration">
+                        <span>本人聲明以上提供的所有資料均屬真實，並明白提供虛假資料須承擔法律責任</span>
+                    </label>
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="prevStep()">← 上一步</button>
+                <button class="btn btn-primary" onclick="submitKYC()" id="submitBtn">提交申請</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Done Screen -->
+    <div class="done-screen" id="doneScreen">
+        <div class="icon">✅</div>
+        <h2>申請已提交</h2>
+        <p>您的賬戶申請已成功提交，合規部將在1-2個工作天內完成審批。<br>審批結果將透過電郵通知您。</p>
+        <a href="/wbank" class="btn btn-primary">返回首頁</a>
+    </div>
+</div>
+
+<script>
+var currentStep = 1;
+var totalSteps = 4;
+
+function updateSteps() {
+    document.querySelectorAll('.step-content').forEach(function(el){el.classList.remove('active')});
+    document.querySelector('.step-content[data-step="'+currentStep+'"]').classList.add('active');
+    document.querySelectorAll('.progress-bar .step').forEach(function(s){
+        var n = parseInt(s.getAttribute('data-step'));
+        s.classList.remove('active','done');
+        if (n === currentStep) s.classList.add('active');
+        else if (n < currentStep) s.classList.add('done');
+    });
+}
+
+function nextStep() {
+    if (currentStep < totalSteps) {
+        if (!validateStep(currentStep)) return;
+        currentStep++;
+        updateSteps();
+        window.scrollTo(0,0);
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) { currentStep--; updateSteps(); window.scrollTo(0,0); }
+}
+
+function validateStep(step) {
+    if (step === 1) {
+        var req = ['surname','givenname','dob','email','address'];
+        for (var i=0;i<req.length;i++){
+            var el = document.getElementById(req[i]);
+            if (!el.value.trim()){ el.focus(); alert('請填寫所有必填欄位'); return false; }
+        }
+        return true;
+    }
+    if (step === 2) {
+        var hkid = document.getElementById('hkid').value.trim();
+        if (!hkid || !/^[A-Z]{1,2}[0-9]{6}\([0-9A]\)$/.test(hkid)){
+            document.getElementById('hkidError').style.display='block';
+            document.getElementById('hkid').classList.add('error');
+            document.getElementById('hkid').focus();
+            return false;
+        }
+        document.getElementById('hkidError').style.display='none';
+        document.getElementById('hkid').classList.remove('error');
+        return true;
+    }
+    return true;
+}
+
+function submitKYC() {
+    if (!document.getElementById('agreeTerms').checked ||
+        !document.getElementById('agreeCompliance').checked ||
+        !document.getElementById('agreeDeclaration').checked) {
+        alert('請同意所有條款及聲明');
+        return;
+    }
+    
+    // Show loading overlay
+    document.getElementById('loadingOverlay').classList.add('show');
+    document.getElementById('submitBtn').disabled = true;
+    
+    // Animate progress bar
+    var fill = document.getElementById('progressFill');
+    var progress = 0;
+    var timer = setInterval(function(){
+        progress += Math.random() * 8 + 2;
+        if (progress > 90) progress = 90;
+        fill.style.width = progress + '%';
+    }, 1000);
+    
+    // Collect data
+    var data = {
+        surname: document.getElementById('surname').value,
+        givenname: document.getElementById('givenname').value,
+        cname: document.getElementById('cname').value,
+        dob: document.getElementById('dob').value,
+        gender: document.getElementById('gender').value,
+        phone: document.getElementById('phone').value,
+        email: document.getElementById('email').value,
+        address: document.getElementById('address').value,
+        hkid: document.getElementById('hkid').value,
+        nationality: document.getElementById('nationality').value,
+        birthplace: document.getElementById('birthplace').value,
+        taxResidence: document.getElementById('taxResidence').value,
+        tin: document.getElementById('tin').value,
+        employment: document.getElementById('employment').value,
+        occupation: document.getElementById('occupation').value,
+        income: document.getElementById('income').value,
+        fundSource: document.getElementById('fundSource').value
+    };
+    
+    // Send to server (simulated auto-review)
+    var x = new XMLHttpRequest();
+    x.onreadystatechange = function() {
+        if (x.readyState == 4) {
+            clearInterval(timer);
+            fill.style.width = '100%';
+            setTimeout(function(){
+                document.getElementById('loadingOverlay').classList.remove('show');
+                document.querySelector('.step-content.active').classList.remove('active');
+                document.getElementById('doneScreen').classList.add('show');
+                document.getElementById('progressBar').style.display = 'none';
+            }, 800);
+        }
+    };
+    x.open('POST', '/wbank/kyc/submit', true);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.send(JSON.stringify(data));
+}
+
+// HKID format validation on input
+document.getElementById('hkid').addEventListener('input', function(){
+    this.value = this.value.toUpperCase();
+    var error = document.getElementById('hkidError');
+    var test = /^[A-Z]{1,2}[0-9]{6}\([0-9A]\)$/.test(this.value);
+    if (this.value.length > 0 && !test) { error.style.display='block'; this.classList.add('error'); }
+    else { error.style.display='none'; this.classList.remove('error'); }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>世遊娛樂城</title>
+    <style>
+      body {
+        background-color: white;
+        color: black;
+        font-family: Arial, sans-serif;
+      }
+      .btn {
+        background-color: blue;
+        color: white;
+        border: none;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        margin: 10px 2px;
+        cursor: pointer;
+      }
+      #userinfo {
+        margin-bottom: 50px;
+      }
+        #depoWithdrawWin {
+      display: none;
+      position: fixed;
+      width: 300px;
+      height: 200px;
+      top: 50%;
+      left: 50%;
+      margin-top: -100px;
+      margin-left: -150px;
+      background-color: #f1f1f1;
+      border: 1px solid #888;
+      padding: 20px;
+    }
+    </style>
+    <script>
+      // 你可以在這裡加入JavaScript代碼來實現21點遊戲的邏輯
+    </script>
+  </head>
+  <body>
+    <div id="userinfo">
+      <h2 id="username"></h2>
+      <h3 id="balance"></h3>
+    </div>
+    <div id="game">
+      <!-- 遊戲的html部分 -->
+      <button onclick="window.location.href='/wp/twoOne/start?user='+'{{ user }}'">遊玩21點</button>
+      <button onclick="window.location.href='/wp/bg/start?user='+'{{ user }}'">遊玩百家樂</button>
+      <button onclick="window.location.href='/wp/luck/start?user='+'{{ user }}'">幸運猜</button>
+    </div>
+    <div id="depoWithdrawWin">
+    <label for="name">Wbank用戶名:</label><br>
+    <input type="text" id="name" name="username"><br>
+    <label for="amount">金額:</label><br>
+    <input type="number" id="amount" name="amount"><br>
+    <select id="action">
+       <option value="in">存入</option>
+       <option value="out">取出</option>
+    </select>
+    <button class="btn" onclick="confirmDepoWithdraw()">確認</button>
+    <button class="btn" onclick="closeDepoWithdrawWin()">關閉</button>
+  </div>
+    <button class="btn" onclick="openDepoWithdrawWin()">存款 / 取款</button>
+    <script>
+      function sleep(time){
+ var timeStamp = new Date().getTime();
+ var endTime = timeStamp + time;
+ while(true){
+ if (new Date().getTime() > endTime){
+  return;
+ } 
+ }
+}
+      document.getElementById("username").innerHTML = "用戶名: " + '{{ user }}';
+      document.getElementById("balance").innerHTML = "餘額: " + '{{ balance }}'+ " 籌碼";
+      function openDepoWithdrawWin() {
+      document.getElementById("depoWithdrawWin").style.display = "block";
+    }
+    function closeDepoWithdrawWin() {
+      document.getElementById("depoWithdrawWin").style.display = "none";
+    }
+    function confirmDepoWithdraw() {
+      var name = document.getElementById("name").value;
+      var amount = document.getElementById("amount").value;
+      var bl = parseInt('{{ balance }}',10);
+      var ab = bl - parseInt(amount,10);
+      var bal = bl + parseInt(amount,10);
+      var action = document.getElementById("action");
+      if (action.value == "in") {
+        alert("處理交易中");
+          fetch('https://wtech-5o6t.onrender.com/wtech/v2/createOrder', {
+    headers: {
+      Username: name,
+      reviewer: 'wtech',
+      Value: amount
+    }
+ })
+  .then(response => response.json())
+  .then(data => {
+    token = data.code; // 從第一個請求的響應中取得 "code"
+    return fetch(`https://wtech-5o6t.onrender.com/wtech/v2/transfer?code=${token}`);
+  })
+  .then(response => response.json());
+        fetch('https://wtech-5o6t.onrender.com/wp/buyIn', {
+    headers: {
+      name: name,
+      balance: bal
+    }
+ });
+        sleep(3000);
+        alert("您已成功操作 $" + amount);
+        closeDepoWithdrawWin();
+      } else {
+        alert("處理交易中");
+        fetch('/wtech/v2/createOrder', {
+    headers: {
+      Username: 'wbank',
+      reviewer: name,
+      Value: amount
+    }
+ })
+  .then(response => response.json())
+  .then(data => {
+    token = data.code; // 從第一個請求的響應中取得 "code"
+    return fetch(`/wtech/v2/transfer?code=${token}`);
+  })
+  .then(response => response.json());
+        fetch('/wp/buyIn', {
+    headers: {
+      name: name,
+      balance: ab
+    }
+ });
+        sleep(3000);
+        alert("您已成功操作 $" + amount);
+        closeDepoWithdrawWin();
+      }
+    }
+    </script>
+  </body>
+</html>

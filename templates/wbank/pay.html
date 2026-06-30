@@ -1,0 +1,51 @@
+<html>
+  <body>
+    <center>
+      <br>
+      <br>
+      <button id="donateButton">Pay</button>
+    </center>
+      <script>
+const supportedInstruments = [
+  {
+    supportedMethods: "basic-card", // 使用基本信用卡支付
+  },
+];
+
+const details = {
+  total: { label: "Donation", amount: { currency: "USD", value: "20.00" } },
+  displayItems: [
+    {
+      label: "Original donation amount",
+      amount: { currency: "USD", value: "20.00" },
+    },
+  ],
+  shippingOptions: [
+    {
+      id: "standard",
+      label: "Standard shipping",
+      amount: { currency: "USD", value: "0.00" },
+      selected: true,
+    },
+  ],
+};
+
+const options = { requestShipping: true };
+
+// 添加事件監聽器
+document.getElementById("donateButton").addEventListener("click", async () => {
+  try {
+    const request = new PaymentRequest(supportedInstruments, details, options);
+    const instrumentResponse = await request.show(); // 由用戶點擊觸發
+
+    // 處理支付回應
+    alert("Done");
+    // 在這裡可以進一步處理 instrumentResponse，例如發送到伺服器
+  } catch (err) {
+    // 錯誤處理
+    alert(err.message);
+  }
+});
+</script>
+  </body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WBank — 泓財銀行 | WCoins Blockchain</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter','Segoe UI',sans-serif;background:linear-gradient(135deg,#080818 0%,#12122a 50%,#080818 100%);min-height:100vh;color:#fff;overflow-x:hidden}
+        #canvas-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+        .container{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:40px 24px}
+        .nav{display:flex;justify-content:space-between;align-items:center;padding:16px 0;margin-bottom:40px}
+        .nav .logo{font-size:20px;font-weight:700;background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .nav .logo span{display:block;font-size:10px;font-weight:300;-webkit-text-fill-color:rgba(255,255,255,0.3);letter-spacing:2px}
+        .nav-links{display:flex;gap:20px;align-items:center}
+        .nav-links a{color:rgba(255,255,255,0.5);text-decoration:none;font-size:13px;transition:color .2s}
+        .nav-links a:hover{color:#fff}
+        .nav-links .btn-login{background:linear-gradient(135deg,#4fc3f7,#00bcd4);color:#080818!important;padding:8px 22px;border-radius:6px;font-weight:600;font-size:13px;transition:transform .2s}
+        .nav-links .btn-login:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(79,195,247,0.25)}
+        .hero{text-align:center;padding:60px 0 30px;margin-bottom:30px}
+        .hero .badge{display:inline-block;background:rgba(79,195,247,0.1);color:#4fc3f7;padding:4px 12px;border-radius:12px;font-size:11px;border:1px solid rgba(79,195,247,0.15);margin-bottom:16px}
+        .hero h1{font-size:48px;font-weight:700;line-height:1.15;margin-bottom:12px}
+        .hero h1 .g{background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero h1 .sm{font-size:14px;font-weight:300;color:rgba(255,255,255,0.25);display:block;margin-top:6px}
+        .hero p{font-size:15px;color:rgba(255,255,255,0.4);max-width:500px;margin:0 auto 24px;line-height:1.7}
+        .hero .btn-primary{background:linear-gradient(135deg,#4fc3f7,#00bcd4);color:#080818;padding:12px 32px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none;display:inline-block;transition:transform .2s,box-shadow .2s}
+        .hero .btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(79,195,247,0.2)}
+        .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:50px}
+        .stat-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:20px;text-align:center;transition:transform .2s}
+        .stat-card:hover{transform:translateY(-3px);background:rgba(255,255,255,0.04)}
+        .stat-card .num{font-size:26px;font-weight:700;background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .stat-card .lbl{font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+        .glow-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:50px}
+        .glow-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:28px 24px;text-align:center;transition:all .3s;position:relative;overflow:hidden}
+        .glow-card::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(79,195,247,0.03) 0%,transparent 60%);opacity:0;transition:opacity .4s}
+        .glow-card:hover::before{opacity:1}
+        .glow-card:hover{transform:translateY(-4px);border-color:rgba(79,195,247,0.2);box-shadow:0 8px 30px rgba(79,195,247,0.05)}
+        .glow-card .icon{font-size:36px;margin-bottom:12px}
+        .glow-card h3{font-size:17px;font-weight:600;margin-bottom:6px}
+        .glow-card p{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6}
+        .glow-card .tag{display:inline-block;margin-top:12px;padding:3px 10px;border-radius:4px;font-size:10px;font-weight:500}
+        .tag-blue{background:rgba(79,195,247,0.1);color:#4fc3f7;border:1px solid rgba(79,195,247,0.1)}
+        .tag-purple{background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.1)}
+        .tag-green{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.1)}
+        .tag-gold{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.1)}
+        .about-section{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:12px;padding:36px;margin-bottom:40px;display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:center}
+        .about-left h2{font-size:22px;font-weight:700;margin-bottom:12px}
+        .about-left h2 .g{background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .about-left p{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.8;margin-bottom:10px}
+        .about-right{text-align:center}
+        .about-right .brand-box{background:rgba(255,255,255,0.03);border-radius:10px;padding:28px;border:1px solid rgba(255,255,255,0.05)}
+        .about-right .brand-box .name{font-size:26px;font-weight:700}
+        .about-right .brand-box .name .w{color:#4fc3f7}
+        .about-right .brand-box .name .t{color:#00bcd4}
+        .about-right .brand-box .sub{font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;letter-spacing:2px}
+        .about-right .brand-box .divider{width:30px;height:2px;background:linear-gradient(135deg,#4fc3f7,#00bcd4);margin:12px auto;border-radius:2px}
+        .about-right .brand-box .desc{font-size:11px;color:rgba(255,255,255,0.3);line-height:1.6}
+        .donate-box{text-align:center;margin-bottom:40px}
+        .donate-box h3{font-size:18px;font-weight:600;margin-bottom:6px}
+        .donate-box p{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:14px}
+        .donate-box .addr{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px 16px;display:inline-block;font-family:monospace;font-size:12px;color:#4fc3f7;word-break:break-all;max-width:100%}
+        .donate-box .copy-btn{background:rgba(79,195,247,0.1);border:1px solid rgba(79,195,247,0.2);color:#4fc3f7;padding:5px 14px;border-radius:5px;font-size:11px;cursor:pointer;margin-top:8px;display:inline-block;transition:background .2s}
+        .donate-box .copy-btn:hover{background:rgba(79,195,247,0.2)}
+        .footer{text-align:center;padding:24px 0;border-top:1px solid rgba(255,255,255,0.04);font-size:12px;color:rgba(255,255,255,0.2)}
+        .footer a{color:rgba(79,195,247,0.4);text-decoration:none}
+        .footer a:hover{color:#4fc3f7}
+        .footer .chain-info{font-size:10px;color:rgba(255,255,255,0.12);margin-top:4px}
+        @media(max-width:768px){
+            .hero h1{font-size:30px}
+            .stats,.glow-grid{grid-template-columns:1fr 1fr}
+            .about-section{grid-template-columns:1fr}
+        }
+    </style>
+</head>
+<body>
+<canvas id="canvas-bg"></canvas>
+<div class="container">
+    <div class="nav">
+        <div class="logo">WBank<span>泓財銀行 · 金融科技</span></div>
+        <div class="nav-links">
+            <a href="#features">服務</a>
+            <a href="#about">關於</a>
+            <a href="/wcoins/explorer">Explorer</a>
+            <a href="https://discord.gg/GnVRXsdFW7" target="_blank">Discord</a>
+            <a href="/wbank/register" style="color:rgba(255,255,255,0.4);font-size:12px;">開戶</a>
+            <a href="/wbank/auth/v1?url=/wbank/client" class="btn-login">登入</a>
+        </div>
+    </div>
+
+    <div class="hero">
+        <div class="badge">✦ WCoins Blockchain · Chain ID 425</div>
+        <h1>WCoins<br><span class="g">區塊鏈金融平台</span><span class="sm">香港 · 泓技科技控股（WTech）研發營運</span></h1>
+        <p>香港團隊研發嘅 WCoins 區塊鏈，結合金融科技應用，提供安全透明嘅數位資產管理方案。</p>
+        <a href="/wbank/auth/v1?url=/wbank/client" class="btn-primary">開始使用 →</a>
+    </div>
+
+    <div class="stats">
+        <div class="stat-card"><div class="num"><span class="counter" data-target="0" id="stat-users">0</span></div><div class="lbl">用戶</div></div>
+        <div class="stat-card"><div class="num"><span class="counter" data-target="0" id="stat-tx">0</span></div><div class="lbl">鏈上交易</div></div>
+        <div class="stat-card"><div class="num">10M</div><div class="lbl">WCN 總發行量</div></div>
+        <div class="stat-card"><div class="num">425</div><div class="lbl">Chain ID</div></div>
+    </div>
+
+    <div class="features" id="features">
+        <div class="sec-header">
+            <span class="sec-badge">✦ SERVICES</span>
+            <h2>平台 <span class="g">服務</span></h2>
+            <p>WCoins Blockchain 為您帶嚟嘅金融科技工具</p>
+        </div>
+        
+        <div class="feature-grid">
+            <div class="feature-card main-card">
+                <div class="card-glow"></div>
+                <div class="fc-icon">⛓️</div>
+                <h3>WCoins Wallet</h3>
+                <p>自主研發 SHA-256 區塊鏈，即時轉帳、鏈上驗證，兼容 MetaMask。</p>
+                <div class="fc-tags">
+                    <span class="t t-blue">即時轉帳</span>
+                    <span class="t t-purple">MetaMask</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="fc-icon">🔍</div>
+                <h3>Blockchain Explorer</h3>
+                <p>查詢區塊數據、交易記錄、地址詳情，支援鏈上驗證。</p>
+                <div class="fc-tags">
+                    <span class="t t-purple">web3.js 兼容</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="fc-icon">💱</div>
+                <h3>WTC ⇄ HKD Swap</h3>
+                <p>泓幣兌換 HKD 現金，即時匯率，靈活配置資產。</p>
+                <div class="fc-tags">
+                    <span class="t t-green">即時匯率</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="fc-icon">🏦</div>
+                <h3>FPS 出金</h3>
+                <p>轉數快及銀行轉帳出金，支援 HKD 即時提取。</p>
+                <div class="fc-tags">
+                    <span class="t t-gold">FPS 支援</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="fc-icon">🔗</div>
+                <h3>Web3 RPC API</h3>
+                <p>完整 JSON-RPC 端點，兼容 web3.js、web3.py、MetaMask。</p>
+                <div class="fc-tags">
+                    <span class="t t-blue">RPC Endpoint</span>
+                </div>
+            </div>
+
+            <div class="feature-card">
+                <div class="fc-icon">🛡️</div>
+                <h3>鏈上驗證</h3>
+                <p>SHA-256 區塊鏈，完整 hash 驗證同自動修復機制。</p>
+                <div class="fc-tags">
+                    <span class="t t-purple">自動修復</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .sec-header{text-align:center;margin-bottom:36px}
+        .sec-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:10px;letter-spacing:2px;background:rgba(79,195,247,0.08);color:#4fc3f7;border:1px solid rgba(79,195,247,0.12);margin-bottom:10px}
+        .sec-header h2{font-size:26px;font-weight:700}
+        .sec-header h2 .g{background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .sec-header p{font-size:13px;color:rgba(255,255,255,0.3);margin-top:6px}
+        .feature-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:14px;margin-bottom:50px}
+        .feature-card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:22px;transition:all .3s;position:relative;overflow:hidden}
+        .feature-card:hover{transform:translateY(-3px);border-color:rgba(79,195,247,0.15);background:rgba(255,255,255,0.04)}
+        .main-card{grid-row:span 2;display:flex;flex-direction:column;justify-content:center;padding:32px;background:linear-gradient(135deg,rgba(79,195,247,0.04),rgba(0,188,212,0.02));border-color:rgba(79,195,247,0.12)}
+        .main-card .card-glow{position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(79,195,247,0.04),transparent 50%);pointer-events:none}
+        .fc-icon{font-size:28px;margin-bottom:10px}
+        .feature-card h3{font-size:15px;font-weight:600;margin-bottom:6px}
+        .feature-card p{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6}
+        .main-card h3{font-size:20px}
+        .main-card p{font-size:13px}
+        .fc-tags{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+        .t{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500}
+        .t-blue{background:rgba(79,195,247,0.1);color:#4fc3f7;border:1px solid rgba(79,195,247,0.1)}
+        .t-purple{background:rgba(167,139,250,0.1);color:#a78bfa;border:1px solid rgba(167,139,250,0.1)}
+        .t-green{background:rgba(74,222,128,0.1);color:#4ade80;border:1px solid rgba(74,222,128,0.1)}
+        .t-gold{background:rgba(251,191,36,0.1);color:#fbbf24;border:1px solid rgba(251,191,36,0.1)}
+        @media(max-width:768px){.feature-grid{grid-template-columns:1fr}.main-card{grid-row:auto}}
+    </style>
+    <div class="about-section" id="about">
+        <div class="about-left">
+            <h2>關於 <span class="g">WBank</span></h2>
+            <p>WBank（泓財銀行）由 <strong style="color:#4fc3f7;">泓技科技控股有限公司（WTech）</strong> 旗下營運，專注於區塊鏈金融科技創新。</p>
+            <p>我哋自主研發咗 WCoins Blockchain — 一條基於 SHA-256 嘅鏈結區塊鏈，支援即時轉帳、鏈上驗證，兼容 MetaMask 等主流錢包。</p>
+            <p>從 WTech 到 WBank，我哋相信科技可以令金融服務更普惠、更透明。</p>
+        </div>
+        <div class="about-right">
+            <div class="brand-box">
+                <div class="name"><span class="w">W</span><span class="t">Tech</span></div>
+                <div class="sub">泓技科技控股有限公司</div>
+                <div class="divider"></div>
+                <div class="desc">
+                    香港金融科技研發<br>
+                    自主區塊鏈 WCoins<br><br>
+                    Chain ID 425 · WCN 10M
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="donate-box">
+        <h3>☕ 支持 WCoins 開發</h3>
+        <p>如您喜歡呢個項目，歡迎捐贈 WCoins 或 ETH</p>
+        <div class="addr">0xd7ebbbb5e2bd3825fc3f41494067f26185e8ba5a</div><br>
+        <button class="copy-btn" onclick="copyAddr()">📋 複製地址</button>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 <a href="/">WBank 泓財銀行</a> — 泓技科技控股有限公司 (WTech) 香港</p>
+        <p style="margin-top:4px;"><a href="https://discord.gg/GnVRXsdFW7" target="_blank" style="color:#5865F2;">加入 Discord</a></p>
+        <p class="chain-info">WCoins Blockchain · Chain 425 · Supply 10,000,000 WCN</p>
+    </div>
+</div>
+
+<script>
+(function(){
+    const c=document.getElementById('canvas-bg'),cx=c.getContext('2d');
+    let W,H;
+    function resize(){W=c.width=innerWidth;H=c.height=innerHeight}
+    resize(); addEventListener('resize',resize);
+    const p=[],N=50,D=['WCN','WTC','HKD','423','⧫','◈','◆','⟐'];
+    for(let i=0;i<N;i++) p.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*2+.5,a:Math.random()*.3+.1,t:Math.random()*Math.PI*2});
+    const f=[];
+    for(let i=0;i<6;i++) f.push({x:Math.random()*W,y:Math.random()*H,text:D[Math.floor(Math.random()*D.length)],vy:-.1-Math.random()*.1,a:Math.random()*.05+.02,s:Math.random()*8+7});
+    let tm=0;
+    function animate(){
+        tm+=.01;
+        cx.clearRect(0,0,W,H);
+        for(let i=0;i<p.length;i++){
+            for(let j=i+1;j<p.length;j++){
+                let dx=p[i].x-p[j].x,dy=p[i].y-p[j].y,d=Math.sqrt(dx*dx+dy*dy);
+                if(d<180){cx.beginPath();cx.moveTo(p[i].x,p[i].y);cx.lineTo(p[j].x,p[j].y);cx.strokeStyle='rgba(79,195,247,'+(.06*(1-d/180))+')';cx.lineWidth=.5;cx.stroke()}
+            }
+        }
+        for(let i=0;i<p.length;i++){
+            let q=p[i];q.x+=q.vx+Math.sin(tm+q.t)*.08;q.y+=q.vy+Math.cos(tm+q.t)*.08;
+            if(q.x<-20)q.x=W+20;if(q.x>W+20)q.x=-20;if(q.y<-20)q.y=H+20;if(q.y>H+20)q.y=-20;
+            cx.beginPath();cx.arc(q.x,q.y,q.r,0,Math.PI*2);cx.fillStyle='rgba(79,195,247,'+q.a+')';cx.fill()
+        }
+        for(let i=0;i<f.length;i++){
+            let d=f[i];d.x+=Math.sin(tm+d.s)*.1;d.y+=d.vy;
+            if(d.y<-20){d.y=H+20;d.x=Math.random()*W;d.text=D[Math.floor(Math.random()*D.length)]}
+            cx.font=d.s+'px Inter,sans-serif';cx.fillStyle='rgba(79,195,247,'+d.a+')';cx.fillText(d.text,d.x,d.y)
+        }
+        requestAnimationFrame(animate)
+    }
+    animate()
+})();
+
+document.addEventListener('DOMContentLoaded',function(){
+    document.querySelectorAll('.counter').forEach(function(el){
+        var t=parseInt(el.getAttribute('data-target'));
+        !function u(){var c=parseInt(el.innerText.replace(/,/g,''));var i=Math.max(1,Math.floor(t/50));if(c<t){el.innerText=Math.min(c+i,t).toLocaleString();setTimeout(u,80)}else{el.innerText=t.toLocaleString()}}()
+    })
+});
+
+fetch('/wcoins/api/stats').then(function(r){return r.json()}).then(function(d){
+    if(d.blocks){var tx=document.getElementById('stat-tx');if(tx)tx.textContent=d.blocks}
+    if(d.total_amount){var us=document.getElementById('stat-users');if(us)us.textContent=Math.floor(d.total_amount/10000)}
+}).catch(function(){});
+
+function copyAddr(){
+    var a='0xd7ebbbb5e2bd3825fc3f41494067f26185e8ba5a';
+    navigator.clipboard.writeText(a).then(function(){alert('Copied!')}).catch(function(){
+        var ta=document.createElement('textarea');ta.value=a;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!')
+    })
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>W Bank -- 注册帳號頁面</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+        }
+        #container {
+            max-width: 400px;
+            margin: 50px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #2e3c4d;
+            margin-bottom: 20px;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #2e3c4d;
+            outline: none;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: vertical;
+            background-color: #f0f0f0;
+            color: #333;
+            font-size: 14px;
+        }
+        .button {
+            background-color: #2e3c4d;
+            color: #ffffff;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 48%;
+            transition: background-color 0.3s;
+            margin: 10px 1%;
+            display: inline-block;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #1c2634;
+        }
+        .step {
+            display: none;
+        }
+        .active {
+            display: block;
+        }
+        @media (max-width: 400px) {
+            #container {
+                padding: 20px;
+            }
+            h2 {
+                font-size: 20px;
+            }
+            .button {
+                font-size: 14px;
+            }
+        }
+        /* From Uiverse.io by Praashoo7 */ 
+/* The switch - the box around the slider */
+.switch {
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: 3.5em;
+  height: 2em;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  box-shadow: inset 2px 5px 10px rgba(0,0,0,0.3);
+  transition: .4s;
+  border-radius: 5px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 1.4em;
+  width: 0.1em;
+  border-radius: 0px;
+  left: 0.3em;
+  bottom: 0.3em;
+  background-color: white;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #171717;
+  box-shadow: inset 2px 5px 10px rgb(0, 0, 0);
+}
+
+input:checked + .slider:before {
+  transform: translateX(2.8em) rotate(360deg);
+}
+.message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+.valid {
+  color: green;
+}
+/* Modal */
+        .model {
+            display: none; /* 初始隱藏 */
+            justify-content: center;
+            align-items: center; /* 置中對齊 */
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* 灰色背景 */
+            z-index: 1000;
+        }
+        .model-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            width: 300px; /* 固定寬度 */
+            position: relative;
+        }
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h2>W Bank 用戶登記</h2>
+        <form id="registrationForm" action="/wbank/v1/createUser" method="POST">
+            <!-- Step 1: Personal Details -->
+            <div class="step active" id="step1">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <label>你的名字：</label>
+                <input type="text" name="fname" placeholder="全名" required>
+                <label>護照號碼：</label>
+                <input type="text" name="id" placeholder="護照號碼" required>
+                <label>用戶名稱：</label>
+                <input type="text" name="user" placeholder="用戶名稱" required>
+                <label>密碼：</label>
+                <input type="password" name="pw" id="pw" placeholder="Password" required>
+                <div id="message" class="message"></div>
+                <label>開戶原因:</label>
+                <select id="createReason">
+                    <option value="儲蓄或消費">儲蓄或消費</option>
+                    <option value="投資">投資</option>
+                    <option value="事業發展">事業發展</option>
+                </select>
+                <button type="button" id="nextBtn1" class="button">下一步</button>
+            </div>
+            <!-- Step 2: Information detail -->
+            <div class="step" id="step2">
+                <span id="optionPlace"></span>
+                <br>
+                <button type="button" id="prevBtn2" class="button">上一步</button>
+                <button type="button" id="confirmInfoBtn" class="button">下一步</button>
+            </div>
+            <!-- Step 3: Terms and Conditions -->
+            <div class="step" id="step3">
+                <label>條款及條件：</label>
+                <textarea readonly>
+                WBank誠邀您成為我們的客戶。在您申請開立帳戶時，我們需要您提供正確、完整的個人資料，包括但不限於身份證或證件號碼、姓名等。請確保所提供的資料屬實，因為不實資料可能導致開戶申請被拒絕或被終止。
+
+為確保使用者安全及遵守法律法規，請注意以下條款：
+1. 使用者必須年滿18歲，若未滿18歲，請先取得監護人同意。
+2. 使用者需自行承擔所有交易風險。
+3. 本銀行保留隨時變更條款的權利，請留意我們網站或通知上的更新資訊。
+3. 使用者確保不是信貸記錄很差（接近破產或已破產）的人士。
+4. 本銀行目前只服務香港、香港、台灣、馬亞（包含東馬、西馬）、新加坡地方。
+5. 本銀行會自動開投資賬戶，使用者可不投資。如果選擇投資，請自行承受風險。
+
+若您的帳戶出現異常情況，WBank有權凍結或停止您的帳戶，並可能清空帳戶資金。我們保留這項權利以確保平台的安全及遵守法律法規。
+
+感謝您選擇WBank，我們期待與您建立良好的合作關係。如有任何疑問或需要進一步協助，請隨時與我們聯絡。
+                </textarea>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="termsCheckbox" disabled>
+                    <label for="termsCheckbox">我已閱讀並同意條款及條件。</label>
+                </div>
+                <button type="button" id="prevBtn3" class="button">上一步</button>
+                <button type="button" id="nextBtn2" class="button">下一步</button>
+            </div>
+
+            <!-- Step 4:  Confirmation -->
+            <div class="step" id="step4">
+                <h3>確認資料</h3>
+                <p><strong>名字：</strong><span id="confirmName"></span></p>
+                <p><strong>護照號碼：</strong><span id="confirmId"></span></p>
+                <p><strong>用戶名稱：</strong><span id="confirmUser"></span></p>
+                 <br>
+                <strong><label>本人已同意 <span id="w-country-bank-text">香港金融安全及管理局銀行業條款。</span></label></strong>
+                <button type="submit" id="submitBtn" class="button">提交</button>
+                <button type="button" id="prevBtn4" class="button">上一步</button>
+            </div>
+            <div class="model" id="w-bankModal">
+        <div class="model-content">
+            <span class="close" onclick="document.getElementById('w-bankModal').style.display='none';">&times;</span>
+            <h3>香港金融安全及管理局銀行業條款</h3>
+            <br>
+            <textarea readonly>
+                《香港金融安全及管理局銀行業條款》
+                1-- 所有在香港經營的銀行都一定要遵守香港金融安全及管理局銀行業規定。
+                 2-- 所有在香港經營的銀行的高管及行長都一定要簽《香港金融安全及管理局銀行高管及就職協議》。
+                 3-- 香港官員及領導人如果要就職所有在香港經營的銀行的一間銀行，都一定要簽《香港金融安全及管理局--公平公正工作協議》，確保不會不公正情況出現。
+                 4-- 所有在香港經營的銀行都一定要 要求用戶提供身分證明文件，包括地址、職業等。
+                 5-- 所有在香港經營的銀行都一定要 要求用戶提供聯繫方式（電話號碼或電郵都可以）。
+                 6-- 所有在香港經營的銀行都一定要守規定，否則可能被逼結業。
+                 7-- 香港金融安全及管理局會保障所有在香港經營的銀行的用戶資料及財務安全，並提供WTC$4,000,000的存款保障。
+                 8-- 香港金融安全及管理局一向嚴厲打擊犯罪分子及洗錢（洗錢定義是 將黑的髒錢 透過一系列的程序被它洗白 就是變為合法的資金）。
+                 9-- 在香港，洗錢罪行最高刑罰是封禁8個月，罰款7000萬泓幣。所以切勿以身試法。
+                 10-- 以上就是相關規定，請留意香港金融安全及管理局最新消息。
+            </textarea>
+        </div>
+    </div>
+        </form>
+    </div>
+
+    <script>
+        const nextBtn1 = document.getElementById('nextBtn1');
+        const confirmInfoBtn = document.getElementById('confirmInfoBtn');
+        const nextBtn2 = document.getElementById('nextBtn2');
+        const prevBtn2 = document.getElementById('prevBtn2');
+        const prevBtn3 = document.getElementById('prevBtn3');
+        const prevBtn4 = document.getElementById('prevBtn4');
+        const submitBtn = document.getElementById('submitBtn');
+
+        const step1 = document.getElementById('step1');
+        const step2 = document.getElementById('step2');
+        const step3 = document.getElementById('step3');
+        const step4 = document.getElementById('step4');
+        const termsCheckbox = document.getElementById('termsCheckbox');
+        const termsTextarea = document.querySelector('textarea');
+        const selectReason = document.getElementById('createReason');
+
+        nextBtn1.addEventListener('click', () => {
+            step1.classList.remove('active');
+            step2.classList.add('active');
+            termsCheckbox.disabled = true; // Disable checkbox initially
+            updateFields();
+        });
+        
+        document.getElementById('pw').addEventListener('input', function () {
+            const password = document.getElementById('pw').value;
+            let message = '';
+            let valid = true;
+
+            // 檢查最少8位
+            if (password.length < 8) {
+                message += '密碼最少需要8位。<br>';
+                valid = false;
+            }
+            // 檢查至少1位數字
+            if (!/\d/.test(password)) {
+                message += '密碼至少需要1位數字。<br>';
+                valid = false;
+            }
+            // 檢查至少1個特殊符號
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                message += '密碼至少需要1個特殊符號。<br>';
+                valid = false;
+            }
+
+            document.getElementById('message').innerHTML = message;
+            document.getElementById('message').className = valid ? 'message valid' : 'message';
+        });
+        
+        selectReason.addEventListener('change',updateFields);
+        
+        function updateFields() {
+            const reason = selectReason.value;
+            document.getElementById('optionPlace').innerHTML = ''; // Clear previous fields
+
+            if (reason === '儲蓄或消費') {
+                document.getElementById('optionPlace').innerHTML = `
+                    <label>大概月收入：(hkd$/ntd$)</label>
+                    <input type="text" name="savingsGoal" placeholder="例如：$80,000" required>
+                    <br>
+                    <label>這是否為出糧/薪金戶口？</label>
+                    <label class="switch">
+                       <input type="checkbox">
+                       <span class="slider"></span>
+                     </label>
+                    <br>
+                    <label>是否需要交稅？</label>
+                    <label class="switch">
+                       <input type="checkbox">
+                       <span class="slider"></span>
+                     </label>
+                    <br>
+                    <label>你是否不是中國大陸人？（如果你是中國大陸人，則不能開戶)</label>
+                    <label class="switch">
+                       <input type="checkbox">
+                       <span class="slider"></span>
+                     </label>
+                `;
+            } else if (reason === '投資') {
+                document.getElementById('optionPlace').innerHTML = `
+                    <label>是否對投資有經驗？（*必要，否則不能開戶）</label>
+                    <input type="checkbox" required>
+                    <br>
+                    <label>請填寫一項你最近三個月內的投資產品:</label>
+                    <input type="text" name="investProduct" placeholder="例子: BTC" required>
+                    <br>
+                    <label>你是否持牌交易員？（如果是，事前要得到公司相關部門同意)</label>
+                    <label class="switch">
+                       <input type="checkbox">
+                       <span class="slider"></span>
+                     </label>
+                `;
+            } else if (reason === '事業發展') {
+                document.getElementById('optionPlace').innerHTML = `
+                    <label>請輸入已註冊的公司名：（如果沒有註冊公司，則填寫僱主的全名)</label>
+                    <input type="text" name="companyName" placeholder="例子: WTech Inc." required>
+                    <br>
+                    <label>介紹一下公司規模、成立年份、以及未來計劃。</label>
+                    <textarea name="businessPlan" placeholder="請簡述您的計劃" required></textarea>
+                    <br>
+                    <label>請上傳相關文件。</label>
+                    <br>
+                    <p> 如果是註冊公司的話，請上傳公司註冊副本或商業登記證。否則，請上傳僱主身份證便可。</p>
+                    <br>
+                    <input type="file" required>
+                `;
+            }
+        }
+        confirmInfoBtn.addEventListener('click', () => {
+            // Proceed to the next step after confirming the information
+            step2.classList.remove('active');
+            step3.classList.add('active');
+        });
+        nextBtn2.addEventListener('click', () => {
+            if (termsCheckbox.checked) {
+                const fname = document.querySelector('input[name="fname"]').value;
+                const id = document.querySelector('input[name="id"]').value;
+                const user = document.querySelector('input[name="user"]').value;
+
+                document.getElementById('confirmName').textContent = fname;
+                document.getElementById('confirmId').textContent = id;
+                document.getElementById('confirmUser').textContent = user;
+
+                step3.classList.remove('active');
+                step4.classList.add('active');
+            } else {
+                alert("請滾動條款並同意條款。");
+            }
+        });
+
+        prevBtn2.addEventListener('click', () => {
+            step2.classList.remove('active');
+            step1.classList.add('active');
+        });
+
+        prevBtn3.addEventListener('click', () => {
+            step3.classList.remove('active');
+            step2.classList.add('active');
+        });
+        
+        prevBtn4.addEventListener('click', () => {
+            step4.classList.remove('active');
+            step3.classList.add('active');
+        });
+
+        termsTextarea.addEventListener('scroll', () => {
+            const scrollTop = termsTextarea.scrollTop;
+            const scrollHeight = termsTextarea.scrollHeight;
+            const clientHeight = termsTextarea.clientHeight;
+
+            if (scrollTop + clientHeight >= scrollHeight) {
+                termsCheckbox.disabled = false; // Enable checkbox if scrolled to the bottom
+            } else {
+                termsCheckbox.disabled = true; // Disable checkbox if not scrolled to the bottom
+            }
+        });
+        document.getElementById("w-country-bank-text").addEventListener("click", () => {
+            document.getElementById('w-bankModal').style.display='flex';
+        });
+        
+        submitBtn.addEventListener('click', () => {
+            document.getElementById('registrationForm').submit();
+        });
+    </script>
+</body>
+</html>

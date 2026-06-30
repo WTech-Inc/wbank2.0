@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WCoins Blockchain Explorer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background:#0a0a1a; color:#fff; font-family:Inter,'Segoe UI',sans-serif; }
+        .container { max-width:1200px; margin:0 auto; padding:24px; }
+        .header { display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; }
+        .header h1 { font-size:24px; font-weight:700; }
+        .header h1 span { color:#4fc3f7; }
+        .header .sub { font-size:12px; color:rgba(255,255,255,0.3); }
+        .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:30px; }
+        .stat-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:20px; text-align:center; }
+        .stat-card .num { font-size:28px; font-weight:700; background:linear-gradient(135deg,#4fc3f7,#00bcd4); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .stat-card .lbl { font-size:12px; color:rgba(255,255,255,0.4); margin-top:4px; }
+        .card { background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06); border-radius:10px; padding:20px; margin-bottom:20px; }
+        .card h3 { font-size:16px; font-weight:600; margin-bottom:16px; }
+        .block { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:16px; margin-bottom:12px; transition:all 0.2s; }
+        .block:hover { background:rgba(79,195,247,0.05); border-color:rgba(79,195,247,0.2); }
+        .block .idx { font-size:12px; color:#4fc3f7; font-weight:600; }
+        .block .detail { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:8px; font-size:13px; }
+        .block .detail .l { color:rgba(255,255,255,0.35); font-size:11px; }
+        .block .detail .v { color:rgba(255,255,255,0.8); }
+        .block .hash { font-family:monospace; font-size:11px; color:rgba(255,255,255,0.25); margin-top:6px; word-break:break-all; }
+        .status-ok { color:#4ade80; }
+        .badge { padding:3px 8px; border-radius:4px; font-size:11px; }
+        .badge-success { background:rgba(74,222,128,0.15); color:#4ade80; }
+        .send-form { display:grid; grid-template-columns:1fr 1fr 80px; gap:8px; }
+        .send-form input { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; padding:8px 12px; color:#fff; font-size:13px; }
+        .send-form input:focus { outline:none; border-color:#4fc3f7; }
+        .send-form button { background:linear-gradient(135deg,#4fc3f7,#00bcd4); border:none; border-radius:6px; color:#0a0a1a; font-weight:600; font-size:12px; cursor:pointer; }
+        .nav-links { display:flex; gap:12px; margin-bottom:20px; }
+        .nav-links a { color:rgba(255,255,255,0.5); text-decoration:none; font-size:13px; padding:6px 16px; border-radius:6px; border:1px solid rgba(255,255,255,0.08); transition:all 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color:#4fc3f7; border-color:#4fc3f7; background:rgba(79,195,247,0.08); }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+        .verify-result { font-size:13px; }
+        .verify-result .ok { color:#4ade80; }
+        .verify-result .fail { color:#ef4444; }
+        @media (max-width:768px) { .stats { grid-template-columns:1fr; } .send-form { grid-template-columns:1fr; } .block .detail { grid-template-columns:1fr 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div>
+            <h1>W<span>Coins</span> Explorer</h1>
+            <div class="sub">WCoins Blockchain · SHA-256 Linked Chain</div>
+        </div>
+        <a href="/wbank/client" style="color:rgba(255,255,255,0.4);font-size:12px;text-decoration:none;">← Back to WBank</a>
+    </div>
+
+    <div id="stats-row" class="stats">
+        <div class="stat-card"><div class="num" id="stat-blocks">0</div><div class="lbl">總區塊數</div></div>
+        <div class="stat-card"><div class="num" id="stat-amount">0</div><div class="lbl">總交易量 (WCoins)</div></div>
+        <div class="stat-card"><div class="num" id="stat-status">-</div><div class="lbl">鏈狀態</div></div>
+    </div>
+
+    <div class="nav-links">
+        <a href="#" class="active" onclick="showTab('explorer',this)">🔍 Explorer</a>
+        <a href="#" onclick="showTab('send',this)">✉️ Send WCoins</a>
+        <a href="#" onclick="showTab('verify',this)">✅ Verify Chain</a>
+    </div>
+
+    <div id="tab-explorer" class="tab-content active">
+        <div class="card">
+            <h3>Latest Blocks</h3>
+            <div id="chain-list">Loading...</div>
+        </div>
+    </div>
+
+    <div id="tab-send" class="tab-content">
+        <div class="card">
+            <h3>Send WCoins</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Create a new block on the WCoins blockchain</p>
+            <div class="send-form">
+                <input type="text" id="send-receiver" placeholder="Receiver username">
+                <input type="number" id="send-amount" placeholder="Amount">
+                <button onclick="sendTx()">Send</button>
+            </div>
+            <div id="send-result" style="margin-top:12px;display:none;font-size:13px;"></div>
+        </div>
+    </div>
+
+    <div id="tab-verify" class="tab-content">
+        <div class="card">
+            <h3>Chain Verification</h3>
+            <p style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">Verify hash integrity and prev_hash chain consistency</p>
+            <button class="btn btn-primary btn-sm" onclick="verifyChain()" style="background:linear-gradient(135deg,#4fc3f7,#00bcd4);border:none;padding:8px 20px;border-radius:6px;color:#0a0a1a;font-weight:600;cursor:pointer;font-size:13px;">🔍 Verify Now</button>
+            <div id="verify-result" style="margin-top:16px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(id, el) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    if (el) el.classList.add('active');
+}
+
+async function loadChain() {
+    try {
+        var r = await fetch('/wcoins/api/chain');
+        var d = await r.json();
+        var stats = d.stats || {};
+        document.getElementById('stat-blocks').textContent = stats.blocks || 0;
+        document.getElementById('stat-amount').textContent = (stats.total_amount || 0).toLocaleString();
+        
+        var chain = d.chain || [];
+        var html = '';
+        for (var i = 0; i < chain.length; i++) {
+            var b = chain[i];
+            var st = b.status === 'SUCCESS' ? '<span class="badge badge-success">SUCCESS</span>' : '<span class="badge" style="background:rgba(239,68,68,0.15);color:#ef4444;">FAILED</span>';
+            html += '<div class="block">';
+            html += '<div class="idx">#' + b.block_index + ' ' + st + '</div>';
+            html += '<div class="detail">';
+            html += '<div><div class="l">From</div><div class="v">' + b.sender + '</div></div>';
+            html += '<div><div class="l">To</div><div class="v">' + b.receiver + '</div></div>';
+            html += '<div><div class="l">Amount</div><div class="v">' + b.amount + ' WCoins</div></div>';
+            html += '<div><div class="l">Time</div><div class="v">' + b.created_at + '</div></div>';
+            html += '</div>';
+            html += '<div class="hash">Hash: ' + b.hash + '<br>Prev: ' + b.prev_hash + '</div>';
+            html += '</div>';
+        }
+        if (chain.length === 0) html = '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);font-size:14px;">⛓️ No blocks yet. Send some WCoins to create the genesis block!</div>';
+        document.getElementById('chain-list').innerHTML = html;
+    } catch(e) {
+        document.getElementById('chain-list').innerHTML = '<div style="color:#ef4444;">Error loading chain: ' + e.message + '</div>';
+    }
+}
+
+async function sendTx() {
+    var recv = document.getElementById('send-receiver').value.trim();
+    var amt = document.getElementById('send-amount').value.trim();
+    var result = document.getElementById('send-result');
+    if (!recv || !amt || parseFloat(amt) <= 0) { alert('Fill in receiver and amount'); return; }
+    result.style.display = 'none';
+    try {
+        var r = await fetch('/wcoins/api/send', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({receiver: recv, amount: amt})
+        });
+        var d = await r.json();
+        if (d.success) {
+            result.style.display = 'block';
+            result.innerHTML = '<div style="background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);padding:12px;border-radius:8px;color:#4ade80;">✅ Block #' + d.block.block_index + ' created! Sent ' + d.block.amount + ' WCoins to ' + d.block.receiver + '</div>';
+            document.getElementById('send-receiver').value = '';
+            document.getElementById('send-amount').value = '';
+            loadChain();
+        } else {
+            result.style.display = 'block';
+            result.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);padding:12px;border-radius:8px;color:#ef4444;">❌ ' + (d.error || 'Failed') + '</div>';
+        }
+    } catch(e) {
+        result.style.display = 'block';
+        result.innerHTML = '<div style="...">Error: ' + e.message + '</div>';
+    }
+}
+
+async function verifyChain() {
+    var el = document.getElementById('verify-result');
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);">Verifying...</div>';
+    try {
+        var r = await fetch('/wcoins/api/verify');
+        var d = await r.json();
+        var html = '<div style="font-size:16px;font-weight:600;margin-bottom:16px;">' + 
+            (d.valid ? '✅ <span style="color:#4ade80;">Chain is VALID</span>' : '❌ <span style="color:#ef4444;">Chain is INVALID</span>') +
+            ' — ' + d.total_blocks + ' blocks</div>';
+        var details = d.details || [];
+        for (var i = 0; i < details.length; i++) {
+            var v = details[i];
+            html += '<div style="background:rgba(255,255,255,0.03);border-radius:6px;padding:10px;margin-bottom:6px;font-size:12px;">';
+            html += '<span style="font-weight:600;">Block #' + v.block_index + '</span> ';
+            html += v.hash_ok ? '✅ Hash' : '❌ Hash';
+            html += ' | ';
+            html += v.prev_hash_ok ? '✅ PrevHash' : '❌ PrevHash';
+            html += ' <span style="color:rgba(255,255,255,0.3);font-family:monospace;font-size:10px;">' + v.stored_hash.slice(0,16) + '...</span>';
+            html += '</div>';
+        }
+        document.getElementById('stat-status').textContent = d.valid ? '✅ VALID' : '❌ INVALID';
+        el.innerHTML = html;
+    } catch(e) {
+        el.innerHTML = '<div style="color:#ef4444;">Error: ' + e.message + '</div>';
+    }
+}
+
+loadChain();
+setInterval(loadChain, 10000);
+</script>
+</body>
+</html>

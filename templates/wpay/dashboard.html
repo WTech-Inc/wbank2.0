@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WPay 商戶後台</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',sans-serif;background:#f0f2f5;color:#1a1a2e;padding:20px}
+.top{max-width:600px;margin:0 auto 20px;display:flex;justify-content:space-between;align-items:center}
+.top h1{font-size:20px;font-weight:700}
+.top a{font-size:12px;color:#4fc3f7;text-decoration:none}
+.card{background:#fff;border-radius:10px;padding:24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.05);max-width:600px;margin-left:auto;margin-right:auto}
+.card h2{font-size:15px;font-weight:600;margin-bottom:4px}
+.card .desc{font-size:12px;color:#64748b;margin-bottom:16px}
+.form-row{display:flex;gap:8px;margin-bottom:12px}
+.form-row input{flex:1;padding:9px 12px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;outline:none}
+.form-row input:focus{border-color:#4fc3f7}
+.form-row button{padding:9px 18px;background:#4fc3f7;border:none;border-radius:6px;color:#fff;font-weight:600;font-size:12px;cursor:pointer}
+.qr-box{text-align:center;padding:20px}
+.qr-box #qrcode{display:inline-block;padding:12px;background:#fff;border:1px solid #e2e8f0;border-radius:8px}
+.qr-box .pay-url{font-size:11px;color:#64748b;margin-top:8px;word-break:break-all}
+.qr-box .amt{font-size:24px;font-weight:700;color:#1a1a2e;margin-top:8px}
+.qr-box .merchant{font-size:13px;color:#64748b;margin-top:4px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px 6px;color:#64748b;font-weight:500;border-bottom:1px solid #e2e8f0}
+td{padding:8px 6px;border-bottom:1px solid #f1f5f9}
+.status-pending{color:#f59e0b}
+.status-paid{color:#10b981}
+.status-failed{color:#ef4444}
+.empty{text-align:center;padding:24px;color:#94a3b8;font-size:13px}
+</style></head>
+<body>
+<div class="top">
+<h1>🏪 {{ merchant.name }}</h1>
+<a href="/wpay/merchant/logout">登出</a>
+</div>
+
+<div class="card" style="text-align:center;">
+    <h2>🏪 收款 QR Code</h2>
+    <p class="desc">用手機相機 Scan → 去付款頁 | 用 MetaMask Scan → 直接填地址</p>
+    <div style="padding:16px;">
+        <div id="merchantQr" style="display:inline-block;padding:10px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;"></div>
+        <div style="font-size:20px;font-weight:700;margin-top:10px;">{{ merchant.name }}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px;word-break:break-all;" id="merchantAddr"></div>
+    </div>
+</div>
+
+<div class="card">
+<h2>💰 收款</h2>
+<p class="desc">輸入金額生成收款 QR Code</p>
+<div class="form-row">
+<input type="number" id="payAmount" placeholder="輸入金額 (WCN)" min="1">
+<button onclick="createPayment()">生成</button>
+</div>
+<div class="qr-box" id="qrBox" style="display:none">
+<div id="qrcode"></div>
+<div class="amt" id="displayAmt"></div>
+<div class="merchant" id="displayMerchant"></div>
+<div class="pay-url" id="displayUrl"></div>
+</div>
+</div>
+
+<div class="card">
+<h2>📋 交易記錄</h2>
+<table>
+<thead><tr><th>金額</th><th>用戶</th><th>狀態</th><th>時間</th></tr></thead>
+<tbody id="txTable"><tr><td colspan="4" class="empty">載入中...</td></tr></tbody>
+</table>
+</div>
+
+<script>
+// Load QRCode library
+(function(){
+    var s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js';
+    s.onload = function() {
+        var payUrl = window.location.origin + '/wpay/pay/' + {{ merchant.id }};
+        var addr = '0x177876F0aCebc209105e4e4eAB9F8B19263C76E2';
+        document.getElementById('merchantAddr').textContent = addr;
+        // Show two QR codes: payment URL + MetaMask address
+        var html = '<div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">';
+        html += '<div><div id="qrPay"></div><div style="font-size:10px;color:#64748b;margin-top:4px;">📱 付款連結</div></div>';
+        html += '<div><div id="qrMM"></div><div style="font-size:10px;color:#f6851b;margin-top:4px;">🦊 MetaMask</div></div>';
+        html += '</div>';
+        document.getElementById('merchantQr').innerHTML = html;
+        new QRCode(document.getElementById('qrPay'), {text: payUrl, width: 160, height: 160});
+        new QRCode(document.getElementById('qrMM'), {text: addr, width: 160, height: 160});
+    };
+    document.head.appendChild(s);
+})();
+
+function createPayment() {
+    var amt = document.getElementById('payAmount').value;
+    if (!amt || parseInt(amt) <= 0) { alert('輸入金額'); return; }
+    var x = new XMLHttpRequest();
+    x.onreadystatechange = function() {
+        if (x.readyState == 4 && x.status == 200) {
+            var d = JSON.parse(x.responseText);
+            showQR(d.payment_id, d.amount, d.merchant);
+        }
+    };
+    x.open('POST', '/wpay/api/create_payment', true);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.send(JSON.stringify({amount: parseInt(amt)}));
+}
+
+function showQR(pid, amt, merchant) {
+    var url = window.location.origin + '/wpay/pay/' + pid;
+    document.getElementById('displayAmt').textContent = amt + ' WCN';
+    document.getElementById('displayMerchant').textContent = merchant;
+    document.getElementById('displayUrl').textContent = url;
+    document.getElementById('qrBox').style.display = 'block';
+    document.getElementById('qrcode').innerHTML = '';
+    new QRCode(document.getElementById('qrcode'), {text: url, width: 180, height: 180});
+}
+
+function loadTx() {
+    var x = new XMLHttpRequest();
+    x.onreadystatechange = function() {
+        if (x.readyState == 4 && x.status == 200) {
+            var rows = JSON.parse(x.responseText);
+            var html = '';
+            if (rows.length === 0) {
+                html = '<tr><td colspan="4" class="empty">暫無記錄</td></tr>';
+            } else {
+                for (var i = 0; i < rows.length; i++) {
+                    var r = rows[i];
+                    var st = r.status === 'paid' ? 'status-paid' : 'status-pending';
+                    html += '<tr><td>' + r.amount + ' WCN</td><td>' + (r.user || '-') + '</td><td class="' + st + '">' + r.status + '</td><td>' + (r.time || '') + '</td></tr>';
+                }
+            }
+            document.getElementById('txTable').innerHTML = html;
+        }
+    };
+    x.open('GET', '/wpay/api/merchant_tx', true);
+    x.send();
+}
+loadTx();
+setInterval(loadTx, 5000);
+</script>
+</body>
+</html>

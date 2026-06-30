@@ -1,0 +1,134 @@
+<html>
+  <head>
+    <title>WCoins -- {{user}} page</title>
+    <style>
+      #top {
+       width: 300px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border-radius: 5px;
+       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      }
+      .btn1 {
+        background-color: #2e3c4d;
+        color: rgb(255,255,255);
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+      #warn {
+       width: 298px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border: 3px solid black;
+       animation: wn 5s linear 2s infinite alternate;
+      }
+      @keyframes wn {
+        0% {
+          border: 3px solid #FF0000;
+        }
+        100% {
+          border: 3px solid black;
+        }
+      }
+      #lineChart {
+         width: 100%;
+         height:100%;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <center>
+      <div id="warn">
+        <h2>!!W Coin warn!!</h2>
+        <br>
+        <p>This platform system will shut down for update(s). <br> Date: UTC 2024-01-25T12:37</p>
+      </div>
+    <div id="top">
+       <h2>Welocme {{user}}</h2>
+      <br>
+       <p>Your balance: WTC${{count}}</p>
+      <br>
+      <br>
+      <button class="btn1" onclick="buy()">Buy</button>
+      <br>
+      <button class="btn1" onclick="sell()">Sell out</button>
+      <br>
+      <button class="btn1" onclick="mine()">Mining</button>
+      <br>
+      <br>
+      <p>-------------</p>
+      <br>
+      <canvas id="lineChart"></canvas>
+    </div>
+  </center>
+    <br>
+    <br>
+    <script>
+      const buy = () => {
+        window.location.href="/wcoin/buy?user=" + "{{ user }}";
+      };
+      const sell = () => {
+        window.location.href=" {{ url_for('sellCoin') }}";
+      };
+      const mine = () => {
+         window.location.href=" {{ url_for('chAdd') }}";
+      };
+      var ctx = document.getElementById('lineChart').getContext('2d');
+
+        // 初始化图表
+        var lineChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Wcoins',
+                    data: [],
+                    borderColor: 'blue',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Price/Value'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 定时器，每秒获取数据并更新图表
+        setInterval(function() {
+            fetch("{{ url_for('data')}}")
+                .then(response => response.json())
+                .then(data => {
+                    // 更新图表数据
+                    lineChart.data.labels = data.map(entry => entry.date);
+                    lineChart.data.datasets[0].data = data.map(entry => entry.price);
+                    lineChart.update();
+                });
+        }, 1000);
+    </script>
+  </body>
+</html>

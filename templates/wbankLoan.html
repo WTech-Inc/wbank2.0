@@ -1,0 +1,116 @@
+<html>
+  <head>
+    <title>泓財銀行 -- 貸款界面</title>
+    <style>
+      #top {
+       width: 300px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border-radius: 5px;
+       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      }
+      .btn1 {
+        background-color: #2e3c4d;
+        color: rgb(255,255,255);
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+      #warn {
+       width: 298px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border: 3px solid black;
+       animation: wn 5s linear 2s infinite alternate;
+      }
+      @keyframes wn {
+        0% {
+          border: 3px solid #FF0000;
+        }
+        100% {
+          border: 3px solid black;
+        }
+      }
+      #lineChart {
+         width: 100%;
+         height:100%;
+      }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+  </head>
+  <body>
+      <p id="b">《 回首頁</p>
+    <br>
+    <br>
+    <center>
+    <div id="top">
+       <h2>線上貸款申請表</h2>
+      <br>
+       <label>你的WBank帳戶號碼：</label>
+       <input type="text" id="user" value="{{ user }}" required>
+       <br>
+       <label>貸款理由：</label>
+       <select id="loanPro">
+         <option value="choose">--請選擇貸款目的--</option>
+         <option value="house">居住或住宅方面</option>
+         <option value="sb">創業</option>
+         <option value="st">學業方面</option>
+         <option value="e">急用錢</option>
+       </select>
+       <br>
+       <label>金額(WTC$)：</label>
+       <input type="number" id="amount" required>
+      <br>
+      <button class="btn1" onclick="pay()">按下即申請</button>
+      <br>
+    </div>
+  </center>
+    <br>
+    <br>
+    <script>
+      var socket;
+      window.addEventListener('load',()=> {
+        socket = io();
+      socket.on("connect",()=> {
+        //alert("connected");
+        console.log("Server connected!.");
+      });
+        socket.on("paymentSuccess",(msg) => {
+         console.log(msg.success);
+         alert("申請成功");
+      });
+      });
+      const pay = () => {
+      if (document.getElementById('user').value == "" && document.getElementById('loanPro').value == "choose" && document.getElementById('amount').value == "") {
+         alert('輸入欄位不能留空');
+      } else if (document.getElementById('user').value == "" || document.getElementById('loanPro').value == "choose" || document.getElementById('amount').value == "") {
+          alert('請輸入所需資料');
+      }
+      else {
+        alert('申請進行中，請稍後');
+      socket.emit("transfer",{
+        useracc: "015-150-156167",
+        revacc: document.getElementById('user').value,
+        amount: document.getElementById('amount').value
+      })
+      }
+        /*
+       alert('申請進行中，請稍後');
+      socket.emit("transfer",{
+        username: "wbank",
+        reviewer: document.getElementById('user').value,
+        amount: document.getElementById('amount').value
+      });
+      */
+      };
+    </script>
+  </body>
+</html>

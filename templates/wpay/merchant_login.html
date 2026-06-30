@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WPay 商戶登入</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0a1a,#141433);min-height:100vh;color:#fff;display:flex;align-items:center;justify-content:center}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;width:100%;max-width:360px;backdrop-filter:blur(12px)}
+h2{font-size:20px;font-weight:600;margin-bottom:4px;text-align:center}
+.sub{font-size:12px;color:rgba(255,255,255,0.35);text-align:center;margin-bottom:24px}
+.form-group{margin-bottom:14px}
+.form-group label{font-size:11px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px}
+.form-group input{width:100%;padding:11px 13px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:7px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:border-color.2s}
+.form-group input:focus{border-color:#4fc3f7;box-shadow:0 0 0 3px rgba(79,195,247,0.1)}
+.btn{width:100%;padding:11px;background:linear-gradient(135deg,#4fc3f7,#00bcd4);border:none;border-radius:7px;color:#080818;font-weight:600;font-size:13px;cursor:pointer;font-family:inherit}
+.btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,195,247,0.2)}
+.back{text-align:center;margin-top:14px}
+.back a{color:rgba(255,255,255,0.2);text-decoration:none;font-size:12px}
+.back a:hover{color:rgba(255,255,255,0.4)}
+</style></head>
+<body>
+<div class="card">
+<h2>商戶登入</h2>
+<p class="sub">登入以管理收款</p>
+<form method="POST">
+<div class="form-group"><label>商戶名稱</label><input type="text" name="user" placeholder="Username" required></div>
+<div class="form-group"><label>密碼</label><input type="password" name="pw" placeholder="Password" required></div>
+<button class="btn">登入</button>
+</form>
+<div class="back"><a href="/wpay">← 返回</a></div>
+</div>
+</body>
+</html>

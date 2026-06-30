@@ -1,0 +1,13 @@
+{
+  "config": {
+    "chainId": 456789,
+    "ethash": {}
+  },
+  "difficulty": "0x20000",
+  "gasLimit": "0xE0000000",
+  "alloc": {
+    "0xcA02C4888D7dfa3f052702b1288cF3eE50F248D7": {
+      "balance": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  }
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貪食蛇 (Snake Game) - 電腦 & 手機版</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .game-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            text-align: center;
+            position: relative; /*  ** 相對定位，方便觸控按鈕絕對定位 **  */
+        }
+
+        #gameCanvas {
+            background-color: #ddd;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+
+        .info-panel {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .score-display, .level-display {
+            background-color: #eee;
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .controls-info {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+
+        /*  ** 觸控按鈕樣式 **  */
+        .touch-controls {
+            display: none; /*  ** 預設隱藏觸控按鈕 (電腦螢幕先不顯示) **  */
+            margin-top: 20px;
+            display: flex; /*  ** 手機版時會顯示並使用 Flexbox 排列 **  */
+            justify-content: center; /*  ** 水平置中 **  */
+            align-items: center; /*  ** 垂直置中 **  */
+            position: absolute; /*  ** 相對於 .game-container 定位 **  */
+            bottom: 10px; /*  ** 底部間距 **  */
+            left: 0;
+            right: 0;
+        }
+
+        .touch-button {
+            background-color: #eee; /*  ** 淺灰色按鈕背景 **  */
+            color: #333; /*  ** 深灰色文字 **  */
+            border: 1px solid #ccc; /*  ** 灰色邊框 **  */
+            border-radius: 50%; /*  ** 圓形按鈕 **  */
+            width: 50px; /*  ** 按鈕寬度 **  */
+            height: 50px; /*  ** 按鈕高度 **  */
+            display: flex; /*  ** 讓按鈕文字置中 **  */
+            justify-content: center; /*  ** 水平置中 **  */
+            align-items: center; /*  ** 垂直置中 **  */
+            font-size: 1.5em; /*  ** 按鈕文字大小 **  */
+            cursor: pointer; /*  ** 滑鼠游標樣式 **  */
+            user-select: none; /*  ** 禁止選取文字 **  */
+            margin: 0 10px; /*  ** 按鈕間距 **  */
+            transition: background-color 0.2s ease; /*  ** 背景顏色過渡效果 **  */
+        }
+
+        .touch-button:hover,
+        .touch-button:active { /*  ** 滑鼠 hover 和觸控按下時的效果 **  */
+            background-color: #ddd; /*  ** 更深的淺灰色背景 **  */
+        }
+
+        .touch-button-up {
+            grid-column: 2; /*  ** 上按鈕放在第二列 **  */
+            grid-row: 1;    /*  ** 上按鈕放在第一行 **  */
+        }
+
+        .touch-button-left {
+            grid-column: 1; /*  ** 左按鈕放在第一列 **  */
+            grid-row: 2;    /*  ** 左按鈕放在第二行 **  */
+        }
+
+        .touch-button-right {
+            grid-column: 3; /*  ** 右按鈕放在第三列 **  */
+            grid-row: 2;    /*  ** 右按鈕放在第二行 **  */
+        }
+
+        .touch-button-down {
+            grid-column: 2; /*  ** 下按鈕放在第二列 **  */
+            grid-row: 3;    /*  ** 下按鈕放在第三行 **  */
+        }
+
+
+        /*  **  針對手機螢幕的 Media Query  **  */
+        @media (max-width: 768px) { /*  ** 當螢幕寬度小於等於 768px 時 (常見手機螢幕) **  */
+            .touch-controls {
+                display: grid; /*  ** 手機版改用 Grid 佈局 **  */
+                grid-template-columns: repeat(3, 1fr); /*  ** 三列均分寬度 **  */
+                grid-template-rows: repeat(3, 1fr);    /*  ** 三行均分高度 **  */
+                width: 200px; /*  ** 觸控按鈕區域總寬度 **  */
+                height: 200px;/*  ** 觸控按鈕區域總高度 **  */
+                margin-top: 10px; /*  ** 手機版按鈕區域與遊戲畫面的間距縮小 **  */
+                position: static; /*  ** 取消絕對定位，改為 static 佈局 **  */
+            }
+
+            .game-container {
+                padding-bottom: 0px; /*  ** 手機版移除底部內邊距，因為觸控按鈕不再絕對定位 **  */
+            }
+
+
+            .touch-button {
+                width: 100%; /*  ** 手機上按鈕寬度佔滿 Grid Cell **  */
+                height: 100%; /*  ** 手機上按鈕高度佔滿 Grid Cell **  */
+                font-size: 1.8em; /*  ** 手機上按鈕文字稍微放大 **  */
+                margin: 5px; /*  ** 手機上按鈕間距稍微加大 **  */
+            }
+        }
+
+
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        <h1>80s game</h1>
+        <canvas id="gameCanvas" width="300" height="300"></canvas>
+        <div class="info-panel">
+            <div class="score-display">分數: <span id="score">0</span></div>
+            <div class="level-display">等級: <span id="level">1</span></div>
+        </div>
+        <div class="controls-info">
+            電腦操作： &larr; &uarr; &rarr; &darr; (方向鍵) <br>
+            手機操作： 觸控按鈕
+        </div>
+
+        <div class="touch-controls">
+            <div class="touch-button touch-button-up" id="touchUp">
+                &uarr;
+            </div>
+            <div class="touch-button touch-button-left" id="touchLeft">
+                &larr;
+            </div>
+            <div class="touch-button touch-button-down" id="touchDown">
+                &darr;
+            </div>
+            <div class="touch-button touch-button-right" id="touchRight">
+                &rarr;
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+
+        const gridSize = 20; // 格子大小
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const gridCols = canvasWidth / gridSize; // 遊戲區塊寬度格數
+        const gridRows = canvasHeight / gridSize; // 遊戲區塊高度格數
+
+        const initialSnakeLength = 4; // 初始蛇的長度
+        let snake = []; // 蛇的身體，陣列，每個元素是 {x, y} 座標
+        let food = {};  // 食物的座標 {x, y}
+        let direction = 'right'; // 初始移動方向
+        let nextDirection = 'right'; // 預計的下一個方向 (避免快速連續按鍵的問題)
+        let score = 0;
+        let level = 1;
+        let gameSpeed = 200; // 遊戲速度 (毫秒)
+        let gameInterval;
+        let isGameOver = false;
+
+
+        // ** 初始化遊戲 **
+        function initGame() {
+            createGameBoard();
+            createSnake();
+            generateFood();
+            direction = 'right';
+            nextDirection = 'right';
+            score = 0;
+            level = 1;
+            gameSpeed = 300;
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+            isGameOver = false;
+            clearInterval(gameInterval); // 清除之前的 interval
+            gameInterval = setInterval(gameLoop, gameSpeed); // 啟動遊戲迴圈
+        }
+
+
+        function createGameBoard() {
+            ctx.fillStyle = '#ddd'; // 淺灰色背景
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+        }
+
+        function createSnake() {
+            snake = []; // 清空蛇身
+            // 從中心點開始產生蛇
+            const startX = Math.floor(gridCols / 2);
+            const startY = Math.floor(gridRows / 2);
+            for (let i = 0; i < initialSnakeLength; i++) {
+                snake.push({ x: startX - i, y: startY }); // 蛇頭在右邊，身體向左延伸
+            }
+        }
+
+
+        function generateFood() {
+            let foodX, foodY;
+            let onSnake;
+            do {
+                onSnake = false;
+                foodX = Math.floor(Math.random() * gridCols);
+                foodY = Math.floor(Math.random() * gridRows);
+                for (let segment of snake) {
+                    if (segment.x === foodX && segment.y === foodY) {
+                        onSnake = true; // 食物生成在蛇身上，需要重新生成
+                        break;
+                    }
+                }
+            } while (onSnake); // 確保食物不在蛇身上
+
+            food = { x: foodX, y: foodY };
+        }
+
+
+        function draw() {
+            createGameBoard(); // 清除畫布並繪製背景
+            drawFood();
+            drawSnake();
+            drawScore();
+        }
+
+
+        function drawFood() {
+            ctx.fillStyle = 'red'; // 紅色食物
+            ctx.fillRect(food.x * gridSize, food.y * gridSize, gridSize, gridSize);
+        }
+
+        function drawSnake() {
+            snake.forEach((segment, index) => {
+                ctx.fillStyle = index === 0 ? 'green' : 'lime'; // 蛇頭綠色，身體萊姆綠
+                ctx.fillRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize);
+                ctx.strokeStyle = '#333'; // 黑色邊框
+                ctx.lineWidth = 1;
+                ctx.strokeRect(segment.x * gridSize, segment.y * gridSize, gridSize, gridSize); // 畫邊框
+            });
+        }
+
+        function drawScore() {
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+        }
+
+
+        function update() {
+            if (isGameOver) return; // 遊戲結束則停止更新
+
+            // 根據 nextDirection 更新方向 (避免快速反向移動的問題)
+            direction = nextDirection;
+
+            const head = { x: snake[0].x, y: snake[0].y }; // 複製蛇頭
+
+            // 根據方向更新蛇頭位置
+            if (direction === 'up') head.y--;
+            else if (direction === 'down') head.y++;
+            else if (direction === 'left') head.x--;
+            else if (direction === 'right') head.x++;
+
+
+            // ** 碰撞偵測 **
+
+            // 1. 撞牆
+            if (head.x < 0 || head.x >= gridCols || head.y < 0 || head.y >= gridRows) {
+                gameOver();
+                return;
+            }
+
+            // 2. 撞到自己
+            for (let i = 1; i < snake.length; i++) { // 從蛇身第二節開始檢查
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    gameOver();
+                    return;
+                }
+            }
+
+
+            // 3. 吃到食物
+            if (head.x === food.x && head.y === food.y) {
+                score += 10 * level; // 吃到食物加分，分數與等級連動
+                generateFood();     // 產生新的食物
+                levelUpCheck();      // 檢查是否升級
+                gameSpeed -= 10;
+            } else {
+                snake.pop(); // 沒有吃到食物，移除蛇尾 (保持蛇的長度)
+            }
+
+            snake.unshift(head); // 將新的蛇頭加入蛇身最前端
+
+
+        }
+
+
+        function levelUpCheck() {
+            if (score >= level * level * 50) { // 每累積一定分數升級
+                levelUp();
+            }
+        }
+
+
+        function levelUp() {
+            level++;
+            levelDisplay.textContent = level;
+            gameSpeed = Math.max(50, gameSpeed - 10); // 每次升級加快速度，但最低 50ms
+            clearInterval(gameInterval); // 清除舊的 interval
+            gameInterval = setInterval(gameLoop, gameSpeed); // 設定新的 interval
+        }
+
+
+
+        function gameOver() {
+            isGameOver = true;
+            clearInterval(gameInterval); // 停止遊戲迴圈
+            alert(`遊戲結束！ 您的分數: ${score}，等級: ${level}`);
+            initGame(); // 重新開始遊戲
+        }
+
+
+        function gameLoop() {
+            update(); // 更新遊戲狀態 (蛇移動、碰撞偵測、吃食物等)
+            draw();   // 繪製遊戲畫面
+        }
+
+
+
+        // **  鍵盤事件處理 (電腦版)  **
+        document.addEventListener('keydown', function(event) {
+            if (isGameOver) return; // 遊戲結束時不響應操作
+
+            const key = event.key;
+            if (key === 'ArrowUp' && direction !== 'down') {
+                nextDirection = 'up';
+            } else if (key === 'ArrowDown' && direction !== 'up') {
+                nextDirection = 'down';
+            } else if (key === 'ArrowLeft' && direction !== 'right') {
+                nextDirection = 'left';
+            } else if (key === 'ArrowRight' && direction !== 'left') {
+                nextDirection = 'right';
+            }
+        });
+
+
+        //  ** 觸控按鈕事件處理 (手機版) **
+        const touchUpButton = document.getElementById('touchUp');
+        const touchDownButton = document.getElementById('touchDown');
+        const touchLeftButton = document.getElementById('touchLeft');
+        const touchRightButton = document.getElementById('touchRight');
+
+
+        touchUpButton.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            if (direction !== 'down') {
+                nextDirection = 'up';
+            }
+        });
+
+        touchDownButton.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            if (direction !== 'up') {
+                nextDirection = 'down';
+            }
+        });
+
+        touchLeftButton.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            if (direction !== 'right') {
+                nextDirection = 'left';
+            }
+        });
+
+        touchRightButton.addEventListener('touchstart', function(event) {
+            event.preventDefault();
+            if (direction !== 'left') {
+                nextDirection = 'right';
+            }
+        });
+
+
+
+        // **  遊戲啟動  **
+        initGame(); // 初始化並開始遊戲
+
+
+    </script>
+
+</body>
+</html>

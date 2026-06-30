@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>21點遊戲</title>
+    <style>
+        body {
+            background-color: green;
+            text-align: center;
+        }
+        #game {
+            display: inline-block;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h2 {
+            border: 1px solid black;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px;
+        }
+        button {
+            margin-top: 20px;
+        }
+        #hit-btn {
+           background-color: rgb(0,255,0);
+           color: rgb(255,255,255);
+           padding: 23px 24px;
+           font-size: 26px;
+        }
+        #stand-btn {
+           background-color: rgb(255,0,0);
+           color: rgb(255,255,255);
+           padding: 23px 24px;
+           font-size: 26px;
+        }
+        #fif {
+           background-color: rgb(149,150,188);
+           color: rgb(255,255,255);
+           padding: 25px 24px;
+           font-size: 26px;
+        }
+        #five {
+           background-color: rgb(189,183,107);
+           color: rgb(255,255,255);
+           padding: 23px 24px;
+           font-size: 26px;
+        }
+        #tt {
+           background-color: rgb(53,43,43);
+           color: rgb(255,255,255);
+           padding: 23px 24px;
+           font-size: 26px;
+        }
+        #all-in {
+           background-color: rgb(0,0,0);
+           color: rgb(255,255,255);
+           padding: 23px 24px;
+           font-size: 26px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <h1>21點遊戲</h1>
+        <h2 id="player-hand">你的牌: {{player_hand}}</h2>
+        <h2 id="dealer-hand">莊家的牌: {{dealer_hand[0]}}</h2>
+        <h2 id="balance">你的餘額: {{balance}}</h2>
+        <button id="hit-btn">抽牌</button>
+        <button id="stand-btn">停牌</button>
+         <br>
+        <button id="fif" onclick="placeBet(50)">$50 下注</button>
+    <button id="five" onclick="placeBet(500)">$500 下注</button>
+        <button id="tt" onclick="placeBet(1000)">$1000 下注</button>
+    <button id="all-in" onclick="placeBetAll()">全部下注</button>
+    </div>
+    <script>
+        var user = "{{ user }}";
+document.getElementById('hit-btn').addEventListener('click', () => {
+    fetch('/hit', {
+      method: 'POST', 
+      headers: {
+          'user' : `${user}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({action: 'hit'}) 
+    }).then(response => response.json())
+    .then(data => {
+        document.getElementById('player-hand').textContent = `你的牌: ${data.player_hand}`;
+        checkWinCondition(data);
+    });
+});
+document.getElementById('stand-btn').addEventListener('click', () => {
+    fetch('/stand', {
+      method: 'POST', 
+      headers: {
+          'user' : `${user}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({action: 'stand'}) 
+    }).then(response => response.json())
+    .then(data => {
+        document.getElementById('dealer-hand').textContent = `莊家的牌: ${data.dealer_hand.join(', ')}`;
+        checkWinCondition(data);
+    });
+});
+    function placeBet(amount) {
+            fetch('/bet', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'user' : `${user}`
+                },
+                body: JSON.stringify({ bet_amount: amount }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`下注：${data.bet}，餘額：${data.balance}`);
+            });
+        }
+        function placeBetAll() {
+            fetch('/bet_all', { method: 'POST' ,headers: {'user' : `${user}`}})
+            .then(response => response.json())
+            .then(data => {
+                alert(`下注：${data.bet}，餘額：${data.balance}`);
+            });
+        }
+function checkWinCondition(data) {
+    if (data.player_won) alert('你贏了！')
+    else if (data.dealer_won) alert('莊家贏了！')
+}
+</script>
+</body>
+</html>

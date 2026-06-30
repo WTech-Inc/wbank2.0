@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <title>WCoin mining machine connect</title>
+    <style>
+      #top {
+       width: 300px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border-radius: 5px;
+       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      input[type="text"][type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      }
+      .btn1 {
+        background-color: #2e3c4d;
+        color: rgb(255,255,255);
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+    </style>
+  </head>
+  <body>
+    <center>
+    <div id="top">
+       <h2>Crypto transfer</h2>
+       <br>
+       <br>
+        <form action="/mining/connect" methods="get">
+          <label>ClientID: </label>
+          <input type="text" name="address">
+           <br>
+           <label>Machine key: </label>
+           <input type="text" name="MKey">
+          <br>
+          <label>Machine URL: </label>
+          <input type="url" name="urlLink">
+          <br>
+          <button class="btn1" type="submit">Pay</button>
+      </form>
+    </div>
+  </center>
+    <br>
+    <br>
+    <script>
+      
+    </script>
+  </body>
+</html>

@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>WCloud 泓雲（雲端）服務</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+      /* From Uiverse.io by vinodjangid07 */ 
+#checkbox {
+  display: none;
+}
+
+.switch {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  background-color: rgb(99, 99, 99);
+  border-radius: 50%;
+  z-index: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgb(126, 126, 126);
+  box-shadow: 0px 0px 3px rgb(2, 2, 2) inset;
+}
+.switch svg {
+  width: 1.2em;
+}
+.switch svg path {
+  fill: rgb(48, 48, 48);
+}
+#checkbox:checked + .switch {
+  box-shadow: 0px 0px 1px rgb(151, 243, 255) inset,
+    0px 0px 2px rgb(151, 243, 255) inset, 0px 0px 10px rgb(151, 243, 255) inset,
+    0px 0px 40px rgb(151, 243, 255), 0px 0px 100px rgb(151, 243, 255),
+    0px 0px 5px rgb(151, 243, 255);
+  border: 2px solid rgb(255, 255, 255);
+  background-color: rgb(146, 180, 184);
+}
+#checkbox:checked + .switch svg {
+  filter: drop-shadow(0px 0px 5px rgb(151, 243, 255));
+}
+#checkbox:checked + .switch svg path {
+  fill: rgb(255, 255, 255);
+}
+
+</style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{{ url_for('wcloud_bp.wcloud') }}">WCloud 服務</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('wcloud_bp.list_files') }}">檔案列表</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="jumbotron">
+            {% if username %}
+            <h1 class="display-4">您好 {{username}} , 歡迎使用 WCloud 雲端服務！</h1>
+            {% else %}
+            <h1 class="display-4">您好 什麼人(ㄙㄢ ㄒㄧㄠ人) , 歡迎使用 WCloud 雲端服務！</h1>
+            {% endif %}
+            <p class="lead">在這裡您可以安全地儲存和管理您的檔案。</p>
+            <hr class="my-4">
+            <p>開始將您的檔案和資料夾交給我們吧！</p>
+        </div>
+        {% if count %}
+              <div class="alert alert-info" role="alert"> 您有{{ count }}次次數可以上傳檔案!.
+              </div>
+        {% endif %}
+        <div class="mb-2">
+            <label>開啟主機</label>
+            <!-- From Uiverse.io by vinodjangid07 --> 
+<input id="checkbox" type="checkbox" />
+<label class="switch" for="checkbox">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="slider">
+    <path
+      d="M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32V256c0 17.7 14.3 32 32 32s32-14.3 32-32V32zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z"
+    ></path>
+  </svg>
+</label>
+
+        </div>
+        <div class="mb-3">
+            <!-- button type="button" class="btn btn-success">新增資料夾</button> -->
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal">上傳檔案</button>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4">
+                <h2>檔案</h2>
+                {% if files %}
+                <ul class="list-group">
+                    {% for file in files %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <i class="fas fa-file"></i> <a href="{{ url_for('wcloud_bp.download_file', filename=file) }}">{{ file }}</a>
+                        <div>
+                            <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#renameModal" data-filename="{{ file }}">重命名</button>
+                            <form action="{{ url_for('wcloud_bp.delete_file', filename=file) }}" method="post" style="display:inline;">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                            </form>
+                            <button class="btn btn-success btn-sm" onclick="openModal('{{ file }}')">執行</button>
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p>目前沒有檔案。</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 上傳檔案模態框 -->
+        <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadModalLabel">上傳檔案</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="{{ url_for('wcloud_bp.upload_file') }}" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="file">選擇檔案</label>
+                                <input type="file" class="form-control-file" id="file" name="file" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">上傳</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 重命名檔案模態框 -->
+        <div class="modal fade" id="renameModal" tabindex="-1" aria-labelledby="renameModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="renameModalLabel">重命名檔案</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <form action="{{ url_for('wcloud_bp.rename_file') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" id="oldFilename" name="old_filename" value="">
+                        <div class="modal-body">
+                            <div class="form-group">
+                                <label for="newFilename">新檔名</label>
+                                <input type="text" class="form-control" id="newFilename" name="new_filename" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary">重命名</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    <h2 class="mt-4">Console</h2>
+    <div class="border rounded p-3" style="height: 200px; overflow-y: auto; background-color: black; color: white;">
+        <div id="console-output"></div>
+        <div>
+            <span>[SSH] var/uploads/{{ username }} > </span>
+            <input type="text" id="console-input" class="form-control d-inline" style="display: inline-block; width: auto; background-color: black; color: white; border: none;" placeholder="輸入指令...">
+        </div>
+    </div>
+    <!-- 執行模態框 -->
+    <div class="modal" id="runModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">選擇語言</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>選擇執行語言:</p>
+                    <select id="language-select" class="form-control">
+                        <option value="python">Python/Py語言</option>
+                        <!-- 未來可能會添加更多語言選項 -->
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" onclick="runFile()">Run</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+
+    <script>
+        $('#renameModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var filename = button.data('filename');
+            var modal = $(this);
+            modal.find('.modal-body #oldFilename').val(filename);
+            modal.find('.modal-body #newFilename').val(filename);
+        });
+        document.getElementById('console-input').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            runCommand();
+        }
+    });
+
+    function runCommand() {
+        const input = document.getElementById('console-input');
+        const output = document.getElementById('console-output');
+
+        const command = input.value;
+        if (command) {
+            output.innerHTML += `<div>> ${command}</div>`;
+            output.innerHTML += `<div>${simulateCommand(command)}</div>`;
+            input.value = ''; // 清空輸入框
+            output.scrollTop = output.scrollHeight; // 自動滾動到最底部
+        }
+    }
+
+    function simulateCommand(command) {
+        switch (command.toLowerCase()) {
+            case 'help':
+                return '可用命令: help, clear, hello';
+            case 'clear':
+                document.getElementById('console-output').innerHTML = '';
+                return '';
+            case 'hello':
+                return 'Hello';
+            default:
+                fetch('/run_cmds', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ command: command.toLowerCase() })
+        })
+        .then(response => response.json())
+        .then(data => {
+            return `<div>${data.output}</div>`; // 顯示執行結果
+        })
+        .catch(error => {
+            return `<div>錯誤: ${error.message}</div>`;
+        });
+        }
+    }
+    // Run-code
+    function openModal(filename) {
+        $('#runModal').data('filename', filename).modal('show');
+    }
+
+    function runFile() {
+        const filename = $('#runModal').data('filename');
+        const language = $('#language-select').val();
+        const output = document.getElementById('console-output');
+
+        output.innerHTML = ''; // 清空之前的輸出
+
+        // 傳送請求給後端
+        fetch('/run_file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ filename: filename, language: language })
+        })
+        .then(response => response.json())
+        .then(data => {
+            output.innerHTML += `<div>${data.output}</div>`; // 顯示執行結果
+        })
+        .catch(error => {
+            output.innerHTML += `<div>錯誤: ${error.message}</div>`;
+        });
+    }
+    </script>
+</body>
+</html>

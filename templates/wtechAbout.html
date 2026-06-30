@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>關於WTech</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+<style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    img {
+      width: 100%;
+      height: auto;
+    }
+    footer {
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+      .menu {
+    position: fixed;
+    top: 0;
+    right: -200px; /* 隱藏在頁面右側 */
+    width: 200px;
+    height: 100%;
+    background: #333;
+    color: #fff;
+    transition: right 0.3s ease-in-out;
+}
+.menu ul {
+    padding: 20px;
+    list-style-type: none;
+}
+.menu a {
+    color: #fff;
+}
+.open-btn {
+    background-color: rgb(0,0,0);
+    color: rgb(255,255,255);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+}
+.close-btn {
+    float: right;
+    margin: 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+    <div id="menu" class="menu">
+        <button class="close-btn" onclick="closeMenu()">X</button>
+        <ul>
+        <li><a href="{{ url_for('wtechHome') }}" class="product">主頁</a></li>
+        <br>
+        <li><a href="{{ url_for('wtechProduct') }}" class="product">產品</a></li>
+        <br>
+        <li><a href="{{ url_for('wtechAbout') }}" class="about">關於</a></li>
+        <br>
+        <li><a onclick="returnAlert()" class="wbank">泓財銀行WBank</a></li>
+        </ul>
+    </div>
+    <button class="open-btn" onclick="openMenu()">選單</button>
+<div class="container">
+    <h1>關於WTech</h1>
+    <img src="https://p16-flow-sign-sg.ciciai.com/ocean-cloud-tos-sg/3b92014b68154aa190adba2446532448.png~tplv-0es2k971ck-image.png?rk3s=18ea6f23&x-expires=1741429703&x-signature=GVRwu4aWuGhP0fngRWV5FCPDjvs%3D" alt="About wtech picture">
+    <p>-- 以上圖片為fungpt-turbo生成的。
+    <p>
+      WTech Inc.是一個專業及講求便宜的科技公司，我們提供 WCoins、電子遊戲銷售、Fungpt（Fungpt-turbo）等業務。
+    </p>
+    <p>
+      我們的團隊不斷努力，期待能為你提供最好的服務。
+    </p>
+</div>
+    <script>
+        function openMenu()  {
+    document.getElementById('menu').style.right = '0';
+      var openBtn = document.getElementsByClassName("open-btn");
+      openBtn.style.display = "none";
+}
+function closeMenu() {
+    document.getElementById('menu').style.right = '-200px';
+   var openBtn = document.getElementsByClassName("open-btn");
+    openBtn.style.display = "block";
+}
+const returnAlert = () => {
+        window.location.href="http://bank.wtechhk.xyz";
+      };
+    </script>
+    <br>
+    <footer>© 2024 W Tech. 版權所有。
+       <br>
+       Email : tech-support@wtechhk.xyz -- CTO wangtry <br>
+       Discord forever link : <a href="https://discord.gg/BpB73JGbBT"> click here</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<html>
+  <head>
+    <title>WBank-wcoins -- 賣幣界面</title>
+    <style>
+      #top {
+       width: 300px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border-radius: 5px;
+       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      }
+      .btn1 {
+        background-color: #2e3c4d;
+        color: rgb(255,255,255);
+        padding: 12px 14px;
+        font-size: 13px;
+      }
+      #warn {
+       width: 298px;
+       margin: auto;
+       background-color: #fff;
+       padding: 20px;
+       border: 3px solid black;
+       animation: wn 5s linear 2s infinite alternate;
+      }
+      @keyframes wn {
+        0% {
+          border: 3px solid #FF0000;
+        }
+        100% {
+          border: 3px solid black;
+        }
+      }
+      .loading-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+  z-index: 100; /* 確保在其他元素之上 */
+}
+
+.loading-text {
+  font-size: 24px;
+  color: white;
+  margin-right: 20px;
+}
+
+.loading-dots {
+  display: none;
+  animation: loading-dots 1s linear infinite;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0 5px;
+}
+
+@keyframes loading-dots {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+  </head>
+  <body>
+    <center>
+    <div id="top">
+       <h2>Sell-coins payment page</h2>
+      <br>
+       <label>你的名字：</label>
+       <input type="text" id="user" value="{{ user }}" disabled>
+       <br>
+       <label>收款方：</label>
+       <input type="text" id="reviewer" value="{{ reviewer }}" disabled>
+       <br>
+       <label>金額(WTC$)：</label>
+       {% if amount %}
+       <input type="number" id="amount" value="{{ amount }}" required>
+       {% else %}
+       <input type="number" id="amount" required>
+       {% endif %}
+      <br>
+      <button class="btn1" onclick="pay()">點擊支付</button>
+      <br>
+    </div>
+  </center>
+    <br>
+    <br>
+    <script>
+      const pay = () => {
+      if (document.getElementById('user').value == "" && document.getElementById('reviewer').value == "" && document.getElementById('amount').value == "") {
+         alert('輸入欄位不能留空');
+      } else if (document.getElementById('user').value == "" || document.getElementById('reviewer').value == "" || document.getElementById('amount').value == "") {
+          alert('請輸入所需資料');
+      }
+      else {
+         
+      }
+        alert('付款進行中，請稍後');
+      fetch ("/wbank/hash/transfer", {
+        headers: {
+          username: "{{user}}",
+          reviewer: "{{reviewer}}",
+          amount: document.getElementById("amount").value
+      }
+      });
+        alert("付款成功");
+      };
+    </script>
+  </body>
+</html>

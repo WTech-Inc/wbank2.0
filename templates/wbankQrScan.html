@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>掃描 QR Code</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        #qr-reader {
+            width: 500px;
+            position: relative;
+        }
+
+        #qr-reader-dashboard {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WCoins二維碼介面</h1>
+    <div id="qr-reader">
+        <div id="qr-reader-dashboard">
+            <div id="qr-reader-dashboard-msg" style="color: #fff">掃描中...</div>
+            <div id="qr-reader-dashboard-btn-container">
+                <button id="qr-reader-dashboard-btn" style="display: none;">暫停掃描</button>
+            </div>
+        </div>
+    </div>
+    <canvas id="qr-canvas" width="500" height="500" style="display:none;"></canvas>
+
+    <script>
+        function onScanSuccess(decodedText, decodedResult) {
+            // 在這里處理掃描到的二維碼數據
+            window.location.href="/wbank/v1/paycode?reviewer=" + "{{user}}" + "&code=" + decodedText;
+            // console.log(`Scan result: ${decodedText}`, decodedResult);
+
+            // 將掃描到的結果繪製到 Canvas 上
+            // const canvas = document.getElementById('qr-canvas');
+            // const context = canvas.getContext('2d');
+            // context.drawImage(decodedResult.video, 0, 0, canvas.width, canvas.height);
+            // canvas.style.display = 'block';
+
+            // 這里可以添加跳轉到另一個頁面的邏輯
+            // window.location.href="https://wtech-5o6t.onrender.com/wbank/paycode?user=" + "{{user}}" + "&code=" + decodedText;
+        }
+
+        const html5QrcodeScanner = new Html5QrcodeScanner(
+            'qr-reader', {
+                fps: 10,
+                qrbox: {
+                    width: 250,
+                    height: 250
+                }
+            },
+            /* verbose= */ false);
+        html5QrcodeScanner.render(onScanSuccess);
+    </script>
+</body>
+</html>

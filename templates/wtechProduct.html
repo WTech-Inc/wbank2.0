@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.header {
+    position: fixed;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    background-color: #e9ecef;
+}
+.header .logo {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+.header .login {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.header .product {
+background-color: rgb(255,255,255);
+    color: #000000;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.header .about {
+  background-color: rgb(255,255,255);
+    color: #000000;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.main {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /*每行顯示5個項目*/
+}
+.business-box {
+    width: 300px;
+    height: 300px;
+    border: 1px solid #e9ecef;
+    margin: 0 10px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+footer {
+    background-color: #343a40;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+a {
+    color: #0000FF;
+}
+a:hover {
+    color: #00FF00;
+}
+.second {
+padding: 20px;
+display: flex;
+justify-content: center;
+}
+.custom-window {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 380px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.5);
+    display: none; /* 先設定為 none */
+}
+.blue-button {
+    width: 100%;
+    height: 50px;
+    background-color: deepskyblue;
+    border: none;
+    color: white;
+    font-size: 20px;
+}
+@keyframes dots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+  100% { content: "..."; }
+}
+  .menu {
+    position: fixed;
+    top: 0;
+    right: -200px; /* 隱藏在頁面右側 */
+    width: 200px;
+    height: 100%;
+    background: #333;
+    color: #fff;
+    transition: right 0.3s ease-in-out;
+}
+.menu ul {
+    padding: 20px;
+    list-style-type: none;
+}
+.menu a {
+    color: #fff;
+}
+.open-btn {
+    background-color: rgb(0,0,0);
+    color: rgb(255,255,255);
+    position: fixed;
+    top: 20px;
+    right: 20px;
+}
+.close-btn {
+    float: right;
+    margin: 10px;
+    cursor: pointer;
+}
+.btnn {
+    width: 100%;
+    height: 50px;
+    background-color: #2371c4;
+    border: none;
+    color: white;
+    font-size: 20px;
+}
+#one {
+    background-color: rgb(66, 200, 245);
+    width: 670px;
+    height: 350px;
+    margin: 0 10px;
+    display: center;
+}
+</style>
+  <title>產品專頁</title>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">W Tech</div>
+        <div id="menu" class="menu">
+        <button class="close-btn" onclick="closeMenu()">X</button>
+        <ul>
+        <li><a href="/" class="home">主頁</a></li>
+        <br>
+        </ul>
+    </div>
+    <button class="open-btn" onclick="openMenu()">選單</button>
+    </div>
+    <div class="main">
+      <center>
+       <div id="one">
+         <h2> Uncle Run Game </h2>
+                 <br>
+                 <img src="/static/IMG_8859.jpeg" alt="uncle-run-game" width="170px" height="145px">
+                 <button class="btnn" onclick="onWin()">選購</button>
+        <div id="oneup" class="custom-window">
+        <center>
+          <h2>請複製好以下格式:</h2>
+          <br>
+          我想要 Uncle run PC遊戲，Windows-OS的。
+          <br>
+          價格為港幣55元。
+        </center>
+        <button id="myButton" class="blue-button">我已了解！</button>
+      </div>
+      </div>
+     <div id="one">
+         <h2> 其他服務 </h2>
+                 <br>
+                 <img src="/static/399b0bfa64ac474ba928fb409d657c98.png~tplv-0es2k971ck-image.png" alt="WTech-service" width="170px" height="145px">
+                 <button class="btnn" onclick="gta()">GTA代刷</button>
+                 <br>
+                 <button class="btnn" onclick="sys()">自動化系統服務</button>
+                 <button class="btnn" onclick="web()">網站設計服務</button>
+        <div id="gta-ui" class="custom-window">
+        <center>
+          <h2>請複製好以下格式:</h2>
+          <br>
+          我想要GTA Online代刷服務。
+          <br>
+          我已經預備好風險了。
+        </center>
+
+        <button id="myButton" class="blue-button">我已了解！</button>
+      </div>
+         <div id="sys" class="custom-window">
+        <center>
+          <h2>請複製好以下格式:</h2>
+          <br>
+          我想要自動化系統服務。
+        </center>
+
+        <button id="myButton" class="blue-button">我已了解！</button>
+      </div>
+       <div id="web" class="custom-window">
+        <center>
+          <h2>請複製好以下格式:</h2>
+          <br>
+          我想要網站設計服務。
+        </center>
+
+        <button id="myButton" class="blue-button">我已了解！</button>
+      </div>
+     </div>
+      </div>
+     </center>
+    </div>
+    <script>
+    function onWin() {
+       var popup = document.getElementById('oneup');
+    popup.style.display = 'block'; /* 當頁面加載完後，將 display 設定為 block */
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+    }
+function gta() {
+   var popup = document.getElementById('gta-ui');
+    popup.style.display = 'block'; /* 當頁面加載完後，將 display 設定為 block */
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+}
+function sys() {
+   var popup = document.getElementById('sys');
+    popup.style.display = 'block'; /* 當頁面加載完後，將 display 設定為 block */
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+}
+  function web() {
+   var popup = document.getElementById('web');
+    popup.style.display = 'block'; /* 當頁面加載完後，將 display 設定為 block */
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+}
+        document.getElementById("wcoins").addEventListener("click",() => {
+            alert("Hello");
+        });
+      window.addEventListener("load", function() {
+    var popup = document.getElementById('popup');
+    popup.style.display = 'block'; /* 當頁面加載完後，將 display 設定為 block */
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+        button.innerHTML = "...";
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+});
+      const returnAlert = () => {
+        var popup = document.getElementById('warn');
+         popup.style.display = 'block'; 
+    popup.querySelector('button').addEventListener('click', function() {
+      var button = document.getElementById("myButton");
+        button.innerHTML = "...";
+    popup.style.animationDuration = "1s";
+    popup.style.animationName = "dots";
+        popup.style.display = 'none'; /* 點擊按鈕後，將 display 設回為 none */
+    });
+      };
+      function openMenu()  {
+    document.getElementById('menu').style.right = '0';
+      var openBtn = document.getElementsByClassName("open-btn");
+      openBtn.style.display = "none";
+}
+function closeMenu() {
+    document.getElementById('menu').style.right = '-200px';
+   var openBtn = document.getElementsByClassName("open-btn");
+    openBtn.style.display = "block";
+}
+    </script>
+    <footer>© 2024 W Tech. 版權所有。
+       <br>
+       Email : tech-support@wtechhk.xyz -- CTO wangtry <br>
+       Discord forever link : <a href="https://discord.gg/BpB73JGbBT"> click here</a>
+       Instragram(IG) : <a href="https://www.instagram.com/w_tech_inc?igsh=dmN2bDk5dzk5OWxz"> click here</a>
+    </footer>
+</body>
+</html>

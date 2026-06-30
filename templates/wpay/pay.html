@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>WPay 付款</title>
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Segoe UI',sans-serif;background:linear-gradient(135deg,#0a0a1a,#141433);min-height:100vh;color:#fff;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:32px;width:100%;max-width:380px;text-align:center}
+.store-icon{font-size:48px;margin-bottom:12px}
+h2{font-size:20px;font-weight:600;margin-bottom:4px}
+.merchant-name{font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px}
+.amount-display{font-size:36px;font-weight:700;background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:4px}
+.amount-label{font-size:12px;color:rgba(255,255,255,0.25);margin-bottom:24px}
+.info{font-size:12px;color:rgba(255,255,255,0.35);margin-bottom:20px;line-height:1.6}
+.btn{width:100%;padding:12px;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;margin-bottom:8px}
+.btn-primary{background:linear-gradient(135deg,#4fc3f7,#00bcd4);color:#080818}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(79,195,247,0.2)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5)}
+.result{display:none;margin-top:16px;padding:16px;border-radius:8px;font-size:13px}
+.result.success{display:block;background:rgba(74,222,128,0.1);border:1px solid rgba(74,222,128,0.2);color:#4ade80}
+.result.error{display:block;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444}
+.login-msg{font-size:12px;color:rgba(255,255,255,0.25);margin-top:12px}
+.login-msg a{color:#4fc3f7;text-decoration:none}
+</style></head>
+<body>
+<div class="card" id="payCard">
+<div class="store-icon" id="storeIcon">🏪</div>
+<h2>付款</h2>
+<div class="merchant-name" id="merchantName">載入中...</div>
+<div style="margin:16px 0;">
+    <div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:6px;">付款金額</div>
+    <input type="number" id="payAmount" placeholder="輸入 WCN 數量" min="1" style="width:100%;padding:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:8px;color:#fff;font-size:24px;font-weight:700;text-align:center;outline:none;" onfocus="this.select()">
+</div>
+<div class="info" id="paymentInfo">正在載入商戶資料...</div>
+<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-bottom:16px;">餘額: <span id="userBalance">-</span> WCN</div>
+<button class="btn btn-primary" id="payBtn" onclick="payWithAmount()" style="margin-bottom:8px;">確認付款 (WBank)</button>
+<button class="btn" id="mmPayBtn" onclick="payWithMetaMask()" style="width:100%;padding:12px;background:#f6851b;border:none;border-radius:8px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;font-family:inherit;">
+    🦊 Pay with MetaMask
+</button>
+<div class="result" id="result"></div>
+
+<div class="login-msg" id="loginMsg"></div>
+</div>
+
+<script>
+var paymentId = {{ payment_id }};
+var mmAccount = null;
+
+async function payWithMetaMask() {
+    var amt = document.getElementById('payAmount').value;
+    if (!amt || parseInt(amt) <= 0) { alert('輸入金額'); return; }
+    if (typeof window.ethereum === 'undefined') { alert('請安裝 MetaMask'); return; }
+    var btn = document.getElementById('mmPayBtn');
+    var result = document.getElementById('result');
+    btn.disabled = true; btn.textContent = '⏳';
+    try {
+        var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        var valueHex = '0x' + (BigInt(parseInt(amt)) * 10n ** 18n).toString(16);
+        var tx = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [{
+                from: accounts[0],
+                to: '0x177876F0aCebc209105e4e4eAB9F8B19263C76E2',
+                value: valueHex,
+                gas: '0x5208',
+                gasPrice: '0x0',
+                type: '0x0'
+            }]
+        });
+        result.className = 'result success';
+        result.innerHTML = '✅ ' + amt + ' WCN Sent!<br>TX: ' + tx.slice(0,20) + '...';
+        btn.style.display = 'none';
+    } catch(e) {
+        result.className = 'result error';
+        result.textContent = '❌ ' + (e.message || 'Failed');
+        btn.disabled = false; btn.textContent = '🦊 Pay with MetaMask';
+    }
+}
+
+function payWithAmount() {
+    var amt = document.getElementById('payAmount').value;
+    if (!amt || parseInt(amt) <= 0) { alert('請輸入金額'); return; }
+    document.getElementById('payBtn').disabled = true;
+    document.getElementById('payBtn').textContent = '處理中...';
+    var x = new XMLHttpRequest();
+    x.onreadystatechange = function() {
+        if (x.readyState == 4) {
+            try {
+                var d = JSON.parse(x.responseText);
+                if (d.success) {
+                    document.getElementById('result').className = 'result success';
+                    document.getElementById('result').innerHTML = '✅ 付款成功！<br>' + d.amount + ' WCN → ' + d.to + '<br>TX: ' + d.tx.slice(0,16) + '...';
+                    document.getElementById('payBtn').style.display = 'none';
+                } else if (d.error && d.error.indexOf('Not logged in') >= 0) {
+                    document.getElementById('result').className = 'result error';
+                    document.getElementById('result').innerHTML = '請先登入 WBank';
+                    document.getElementById('loginMsg').innerHTML = '<a href="/wbank/auth/v1?url=/wpay/pay/' + paymentId + '">登入 WBank</a>';
+                } else {
+                    document.getElementById('result').className = 'result error';
+                    document.getElementById('result').textContent = d.error || '付款失敗';
+                    document.getElementById('payBtn').disabled = false;
+                    document.getElementById('payBtn').textContent = '確認付款';
+                }
+            } catch(e) {
+                document.getElementById('result').className = 'result error';
+                document.getElementById('result').textContent = '系統錯誤';
+                document.getElementById('payBtn').disabled = false;
+                document.getElementById('payBtn').textContent = '確認付款';
+            }
+        }
+    };
+    x.open('POST', '/wpay/api/pay_direct', true);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.send(JSON.stringify({merchant_id: paymentId, amount: parseInt(amt)}));
+}
+
+function pay() {
+    if (!paymentData || paymentData.status !== 'pending') {
+        document.getElementById('result').className = 'result error';
+        document.getElementById('result').textContent = '此付款已處理';
+        return;
+    }
+    var btn = document.getElementById('payBtn');
+    btn.disabled = true; btn.textContent = '處理中...';
+    var x = new XMLHttpRequest();
+    x.onreadystatechange = function() {
+        if (x.readyState == 4) {
+            var d = JSON.parse(x.responseText);
+            if (d.success) {
+                document.getElementById('result').className = 'result success';
+                document.getElementById('result').innerHTML = '✅ 付款成功！<br>' + d.amount + ' WCN → ' + d.to + '<br>TX: ' + d.tx.slice(0,16) + '...';
+                document.getElementById('payBtn').style.display = 'none';
+            } else if (d.error && d.error.indexOf('Not logged in') >= 0) {
+                document.getElementById('result').className = 'result error';
+                document.getElementById('result').innerHTML = '請先登入 WBank';
+                document.getElementById('loginMsg').innerHTML = '<a href="/wbank/auth/v1?url=/wpay/pay/' + paymentId + '">登入 WBank</a>';
+            } else {
+                document.getElementById('result').className = 'result error';
+                document.getElementById('result').textContent = d.error || '付款失敗';
+                btn.disabled = false; btn.textContent = '確認付款';
+            }
+        }
+    };
+    x.open('POST', '/wpay/api/pay', true);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.send(JSON.stringify({payment_id: paymentId}));
+}
+
+loadPayment();
+</script>
+</body>
+</html>

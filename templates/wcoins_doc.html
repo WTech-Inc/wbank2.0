@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WCoins Developer Docs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter','Segoe UI',sans-serif;background:#0a0a1a;color:#e2e8f0;min-height:100vh}
+        .top-bar{position:sticky;top:0;z-index:100;background:rgba(10,10,26,0.9);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,0.06)}
+        .top-inner{max-width:1100px;margin:0 auto;padding:14px 24px;display:flex;justify-content:space-between;align-items:center}
+        .top-inner .logo{font-size:18px;font-weight:700;background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .top-inner .logo span{font-size:11px;-webkit-text-fill-color:rgba(255,255,255,0.2);margin-left:6px}
+        .top-inner a{color:rgba(255,255,255,0.4);text-decoration:none;font-size:13px;transition:color.2s}
+        .top-inner a:hover{color:#4fc3f7}
+        .container{max-width:1100px;margin:0 auto;padding:32px 24px 60px}
+        .hero{text-align:center;padding:40px 0 48px}
+        .hero .ic{font-size:48px;margin-bottom:12px}
+        .hero h1{font-size:32px;font-weight:700}
+        .hero h1 span{background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .hero p{font-size:14px;color:rgba(255,255,255,0.4);margin-top:8px;max-width:500px;margin-left:auto;margin-right:auto}
+        .grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:32px}
+        .card{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:24px}
+        .card h2{font-size:16px;font-weight:600;margin-bottom:12px}
+        .card h2 .g{background:linear-gradient(135deg,#4fc3f7,#00bcd4);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+        .card p,.card li{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7}
+        .card ul{padding-left:18px}
+        .card li{margin-bottom:4px}
+        .code-block{position:relative;margin-bottom:12px}
+        .code-block .lang-tag{position:absolute;top:8px;right:10px;font-size:9px;color:rgba(255,255,255,0.2);letter-spacing:1px;font-family:'JetBrains Mono',monospace}
+        pre{background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.06);border-radius:8px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;overflow-x:auto;color:#a8b2c1;tab-size:2}
+        pre .kw{color:#c678dd}
+        pre .fn{color:#61afef}
+        pre .str{color:#98c379}
+        pre .cm{color:#5c6370;font-style:italic}
+        pre .num{color:#d19a66}
+        pre .op{color:#abb2bf}
+        .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+        .info-item{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:6px;padding:14px}
+        .info-item .lbl{font-size:10px;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+        .info-item .val{font-size:13px;font-family:'JetBrains Mono',monospace;color:#4fc3f7;word-break:break-all}
+        .info-item .val.green{color:#4ade80}
+        .info-item .val.purple{color:#a78bfa}
+        .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:500;margin-right:4px}
+        .badge-blue{background:rgba(79,195,247,0.1);color:#4fc3f7}
+        .badge-green{background:rgba(74,222,128,0.1);color:#4ade80}
+        .badge-purple{background:rgba(167,139,250,0.1);color:#a78bfa}
+        .divider{height:1px;background:rgba(255,255,255,0.04);margin:32px 0}
+        .full{grid-column:1/-1}
+        @media(max-width:768px){.grid{grid-template-columns:1fr}.info-grid{grid-template-columns:1fr}}
+        .copy-btn{position:absolute;top:8px;right:80px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);padding:3px 10px;border-radius:4px;font-size:10px;cursor:pointer;transition:all.2s;font-family:inherit}
+        .copy-btn:hover{background:rgba(79,195,247,0.1);color:#4fc3f7}
+    </style>
+</head>
+<body>
+<div class="top-bar">
+    <div class="top-inner">
+        <div class="logo">WCoins <span>Developer Docs</span></div>
+        <a href="/wcoins/explorer">Explorer</a>
+    </div>
+</div>
+<div class="container">
+    <div class="hero">
+        <div class="ic">⛓️</div>
+        <h1>WCoins <span>Web3</span> 開發文檔</h1>
+        <p>用 web3.js / web3.py 連接 WCoins Blockchain，發送交易、查詢餘額</p>
+    </div>
+
+    <!-- Network Info -->
+    <div class="card full" style="margin-bottom:16px">
+        <h2>Network <span class="g">Info</span></h2>
+        <div class="info-grid">
+            <div class="info-item"><div class="lbl">Chain Name</div><div class="val">WCoins Mainnet</div></div>
+            <div class="info-item"><div class="lbl">Chain ID</div><div class="val">425 <span class="badge badge-blue">0x1a9</span></div></div>
+            <div class="info-item"><div class="lbl">RPC Endpoint</div><div class="val" style="font-size:11px">https://wbank.wtechhk.com/wcoins/api/rpc</div></div>
+            <div class="info-item"><div class="lbl">Explorer</div><div class="val green">https://wbank.wtechhk.com/wcoins/explorer</div></div>
+            <div class="info-item"><div class="lbl">Symbol</div><div class="val purple">WCN</div></div>
+            <div class="info-item"><div class="lbl">Total Supply</div><div class="val green">10,000,000 WCN</div></div>
+        </div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="card full" style="margin-bottom:16px">
+        <h2>快速開始</h2>
+        <p style="margin-bottom:14px">安裝 web3.js 然後複製貼上就得</p>
+        <div class="code-block">
+            <span class="lang-tag">BASH</span>
+            <pre><span class="kw">npm</span> install web3</pre>
+        </div>
+    </div>
+
+    <div class="grid">
+        <!-- Connect -->
+        <div class="card">
+            <h2>1. 連接 RPC</h2>
+            <p style="margin-bottom:12px">初始化 Web3 並檢查連接</p>
+            <div class="code-block">
+                <span class="lang-tag">WEB3.JS</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre id="code1">import Web3 from <span class="str">"web3"</span>;
+
+<span class="kw">const</span> web3 = <span class="kw">new</span> Web3(
+  <span class="str">"https://wbank.wtechhk.com/wcoins/api/rpc"</span>
+);
+
+<span class="kw">const</span> chainId = <span class="kw">await</span> web3.eth.getChainId();
+console.log(<span class="str">`Chain: ${chainId}`</span>); <span class="cm">// 425</span>
+
+<span class="kw">const</span> block = <span class="kw">await</span> web3.eth.getBlockNumber();
+console.log(<span class="str">`Block: ${block}`</span>);</pre>
+            </div>
+        </div>
+
+        <!-- Balance -->
+        <div class="card">
+            <h2>2. 查詢餘額</h2>
+            <p style="margin-bottom:12px">用 username 或 0x 地址查</p>
+            <div class="code-block">
+                <span class="lang-tag">WEB3.JS</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre id="code3">import Web3 from <span class="str">"web3"</span>;
+
+<span class="kw">const</span> web3 = <span class="kw">new</span> Web3(<span class="str">"https://wbank.wtechhk.com/wcoins/api/rpc"</span>);
+
+<span class="cm">// 用 username</span>
+<span class="kw">const</span> bal1 = <span class="kw">await</span> web3.eth.getBalance(<span class="str">"ben"</span>);
+console.log(<span class="str">`ben: ${Number(bal1)} WCN`</span>);
+
+<span class="cm">// 用 0x 地址</span>
+<span class="kw">const</span> bal2 = <span class="kw">await</span> web3.eth.getBalance(
+  <span class="str">"0x6700869c8ff7480e34a70a708b028700dbaa3a03"</span>
+);
+console.log(<span class="str">`ben: ${Number(bal2)} WCN`</span>);</pre>
+            </div>
+        </div>
+
+        <!-- Send -->
+        <div class="card full">
+            <h2>3. 發送 WCoins</h2>
+            <p style="margin-bottom:12px">用 raw RPC call 發送交易（Gas = 0）</p>
+            <div class="code-block">
+                <span class="lang-tag">WEB3.JS</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre id="code4">import Web3 from <span class="str">"web3"</span>;
+
+<span class="kw">const</span> web3 = <span class="kw">new</span> Web3(<span class="str">"https://wbank.wtechhk.com/wcoins/api/rpc"</span>);
+
+<span class="cm">// Address mapping</span>
+<span class="kw">const</span> ADDR = {
+  wangtry: <span class="str">"0x177876F0aCebc209105e4e4eAB9F8B19263C76E2"</span>,
+  ben:     <span class="str">"0x6700869c8ff7480e34a70a708b028700dbaa3a03"</span>,
+  wtech:   <span class="str">"0xd7ebbbb5e2bd3825fc3f41494067f26185e8ba5a"</span>,
+};
+
+<span class="kw">async</span> <span class="kw">function</span> <span class="fn">send</span>(from, to, amount) {
+  <span class="kw">const</span> result = <span class="kw">await</span> web3.eth.requestManager.send({
+    method: <span class="str">"eth_sendTransaction"</span>,
+    params: [{
+      from: ADDR[from] || from,
+      to: ADDR[to] || to,
+      value: <span class="str">"0x"</span> + (BigInt(amount) * 10n ** 18n).toString(16),
+      gas: <span class="str">"0x5208"</span>,
+      gasPrice: <span class="str">"0x0"</span>,
+      type: <span class="str">"0x0"</span>
+    }]
+  });
+  <span class="kw">return</span> result;
+}
+
+<span class="cm">// 發送 10 WCN</span>
+<span class="fn">send</span>(<span class="str">"wangtry"</span>, <span class="str">"ben"</span>, <span class="num">10</span>)
+  .then(hash => console.log(<span class="str">`TX: ${hash}`</span>))
+  .catch(e => console.log(<span class="str">`Error: ${e.message}`</span>));</pre>
+            </div>
+        </div>
+
+        <!-- Python -->
+        <div class="card full">
+            <h2>4. Python Web3</h2>
+            <p style="margin-bottom:12px">用 web3.py 連接同查詢</p>
+            <div class="code-block">
+                <span class="lang-tag">WEB3.PY</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre id="code5"><span class="kw">from</span> web3 <span class="kw">import</span> Web3
+
+w3 = Web3(Web3.HTTPProvider(
+    <span class="str">"https://wbank.wtechhk.com/wcoins/api/rpc"</span>
+))
+
+<span class="cm"># 檢查連接</span>
+<span class="kw">print</span>(<span class="str">f"Chain: {w3.eth.chain_id}"</span>)  <span class="cm"># 425</span>
+
+<span class="cm"># 查詢餘額</span>
+bal = w3.eth.get_balance(<span class="str">"ben"</span>)
+<span class="kw">print</span>(<span class="str">f"ben: {bal} WCN"</span>)
+
+<span class="cm"># 查 Block</span>
+block = w3.eth.block_number
+<span class="kw">print</span>(<span class="str">f"Block: {block}"</span>)</pre>
+            </div>
+        </div>
+
+        <!-- Raw API -->
+        <div class="card full">
+            <h2>5. REST API</h2>
+            <p style="margin-bottom:12px">唔用 web3 嘅話可以直接 call REST API</p>
+            <div class="info-grid" style="margin-bottom:12px">
+                <div class="info-item"><div class="lbl">Send</div><div class="val" style="font-size:11px">POST /wcoins/api/send <span class="badge badge-green">application/json</span></div></div>
+                <div class="info-item"><div class="lbl">Balance</div><div class="val" style="font-size:11px">GET /wcoins/api/balance?address=ben</div></div>
+                <div class="info-item"><div class="lbl">History</div><div class="val" style="font-size:11px">GET /wcoins/api/history?address=ben</div></div>
+                <div class="info-item"><div class="lbl">RPC</div><div class="val" style="font-size:11px">POST /wcoins/api/rpc <span class="badge badge-blue">JSON-RPC</span></div></div>
+            </div>
+            <div class="code-block">
+                <span class="lang-tag">CURL</span>
+                <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+                <pre id="code6"><span class="cm"># 查餘額</span>
+curl <span class="str">"https://wbank.wtechhk.com/wcoins/api/balance?address=ben"</span>
+
+<span class="cm"># 發送 WCoins（需登入）</span>
+curl -X POST <span class="str">"https://wbank.wtechhk.com/wcoins/api/send"</span>   -H <span class="str">"Content-Type: application/json"</span>   -d <span class="str">'{"receiver":"wangtry","amount":10}'</span>
+
+<span class="cm"># RPC call</span>
+curl -X POST <span class="str">"https://wbank.wtechhk.com/wcoins/api/rpc"</span>   -H <span class="str">"Content-Type: application/json"</span>   -d <span class="str">'{"method":"eth_blockNumber","params":[],"id":1}'</span></pre>
+            </div>
+        </div>
+
+        <!-- Addresses -->
+        <div class="card full">
+            <h2>Address <span class="g">Reference</span></h2>
+            <p style="margin-bottom:12px">已知用戶嘅 0x 地址對照</p>
+            <div class="info-grid">
+                <div class="info-item"><div class="lbl">ben</div><div class="val" style="font-size:11px">0x6700869c8ff7480e34a70a708b028700dbaa3a03</div></div>
+                <div class="info-item"><div class="lbl">wangtry</div><div class="val" style="font-size:11px">0x177876F0aCebc209105e4e4eAB9F8B19263C76E2</div></div>
+                <div class="info-item"><div class="lbl">wtech</div><div class="val" style="font-size:11px">0xd7ebbbb5e2bd3825fc3f41494067f26185e8ba5a</div></div>
+                <div class="info-item"><div class="lbl">任何用戶</div><div class="val" style="font-size:11px">GET /wcoins/api/eth_address <span class="badge badge-purple">需登入</span></div></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+    <p style="text-align:center;font-size:12px;color:rgba(255,255,255,0.15);">WCoins Blockchain · Chain 425 · WTECH(HK)</p>
+</div>
+
+<script>
+function copyCode(btn) {
+    var pre = btn.parentElement.querySelector('pre');
+    var text = pre.textContent;
+    navigator.clipboard.writeText(text).then(function() {
+        btn.textContent = 'Copied!';
+        setTimeout(function(){btn.textContent = 'Copy';}, 2000);
+    });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "network": "base",
+  "chain_id": 8453,
+  "wtc": {
+    "address": "0x498f0bDA3d53D4B45fCb8DbaAd0932e7A0C848FB"
+  },
+  "bridge": {
+    "address": "0x028D0e9E691aD87980c5AdF3c3951fe5A482874B"
+  }
+}

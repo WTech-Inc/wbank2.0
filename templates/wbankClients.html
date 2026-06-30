@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WBank - 用戶介面</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      padding: 20px 0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    .content {
+      padding: 20px;
+    }
+    .nav {
+      background-color: #ddd;
+      color: #fff;
+      padding: 10px;
+      text-align: center;
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+    }
+    .nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 10px 20px;
+      display: inline-block;
+      position: relative;
+    }
+    .nav img {
+      vertical-align: middle;
+      margin-right: 5px;
+      width: 20px; /* 圖標大小 */
+      height: 20px;
+    }
+    .nav a:hover {
+      background-color: #bbb;
+    }
+    .active {
+      background-color: #bbb;
+    }
+    .qrcode {
+      text-align: center;
+    }
+    .qrcode img {
+      max-width: 200px;
+    }
+    .flashes {
+      list-style-type: none;
+      padding: 0;
+    }
+    .flashes li {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+    .flashes li.success { background-color: #d4edda; color: #155724; }
+    .flashes li.error { background-color: #f8d7da; color: #721c24; }
+    .flashes li.info { background-color: #cce5ff; color: #004085; }
+    #qrcode-page {
+      display: none;
+    }
+  </style>
+  <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+        {% for category, message in messages %}
+          <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+      {% endwith %}
+      <h2>你好 {{ user }}</h2>
+    </div>
+    <div class="content" id="content">
+      <p>你的總資產: WTC${{ balance }}</p>
+      <br>
+      <div id="candleChart" style="width:100%; height:300px;"></div>
+    </div>
+    <div class="nav">
+      <a href="#" class="active" data-target="home">
+        <img src="https://img.icons8.com/material-outlined/24/000000/home.png" alt="首頁">首頁
+      </a>
+      <a href="#" data-target="wpay">
+        <img src="https://img.icons8.com/material-outlined/24/000000/money-transfer.png" alt="WPay">泓之付 WPay
+      </a>
+      <a href="#" data-target="qrcode">
+        <img src="https://img.icons8.com/material-outlined/24/000000/qr-code.png" alt="錢包二維碼">錢包二維碼
+      </a>
+      <a href="#" data-target="my">
+        <img src="https://img.icons8.com/material-outlined/24/000000/user.png" alt="我的">我的
+      </a>
+    </div>
+  </div>
+
+  <div id="qrcode-page" class="container">
+    <div class="qrcode"></div>
+  </div>
+
+  <script>
+    const navLinks = document.querySelectorAll('.nav a');
+    const content = document.getElementById('content');
+    const qrcodePage = document.getElementById('qrcode-page');
+    const balance = {{ balance }};
+    const img = '{{ img }}';
+    const socket = io();
+    let dataPoints1 = [], dataPoints2 = [];
+    let chart;
+
+    function initializeChart() {
+      chart = new CanvasJS.StockChart("candleChart", {
+        theme: "light2",
+        exportEnabled: true,
+        title: { text: "WCoins Market" },
+        charts: [{
+          axisY: { prefix: "WTC$" },
+          data: [{ type: "candlestick", dataPoints: dataPoints1 }]
+        }],
+        navigator: {
+          data: [{ color: "#6D78AD", dataPoints: dataPoints2 }]
+        }
+      });
+      setInterval(() => {
+        fetch("/wcoins/data")
+          .then(response => response.json())
+          .then(data => {
+            dataPoints1.length = 0;
+            dataPoints2.length = 0;
+            data.forEach(item => {
+              dataPoints1.push({
+                x: new Date(item.date),
+                y: [Number(item.open), Number(item.high), Number(item.low), Number(item.close)]
+              });
+              dataPoints2.push({ x: new Date(item.date), y: Number(item.close) });
+            });
+            chart.render();
+          })
+          .catch(error => {
+            alert("載入圖表錯誤："+error.message);
+            console.error("Error fetching data from /wcoins/data:", error);
+          });
+      }, 1000);
+    }
+
+    window.addEventListener("load", () => {
+      initializeChart();
+      socket.on("connect", () => {
+        console.log("Connected to socketIO server");
+      });
+
+      socket.on("UpdateProfit", (data) => {
+        document.querySelector('p:first-of-type').innerHTML = `你的總資產: WTC$${data.amount}`;
+      });
+
+      if (balance > 0) {
+        setInterval(() => {
+          socket.emit("trade", { username: '{{ user }}', balance: balance });
+        }, 1000);
+      }
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+         // event.preventDefault(); // 阻止預設行為
+          navLinks.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          const target = link.dataset.target;
+
+          switch (target) {
+            case 'home':
+              content.innerHTML = `<p>你的總資產: WTC$ ${balance}</p><br><div id="candleChart" style="width:100%; height:300px;"></div>`;
+              initializeChart();
+              qrcodePage.style.display = 'none';
+              break;
+            case 'wpay':
+              content.innerHTML = `
+                <h1>NFC無感支付</h1>
+                <p id="user-info">等待NFC裝置感應...</p>
+                <p id="payment-result"></p>
+              `;
+              handlePayment();
+              qrcodePage.style.display = 'none';
+              break;
+            case 'qrcode':
+              content.innerHTML = `<button onclick="window.location.href='/wbank/client';">更新</button><h2>下方為你的付款或收款碼:</h2><img src="data:image/svg+xml;base64,${img}">`;
+              qrcodePage.style.display = 'block';
+              break;
+            case 'my':
+              content.innerHTML = `<h2>我的</h2><p>餘額: WTC$ ${balance}</p><button onclick="window.location.href='/wbank/logout';">登出</button>`;
+              qrcodePage.style.display = 'none';
+              break;
+          }
+        });
+      });
+    });
+
+    function handlePayment() {
+      const route = prompt("請選擇金流閘道： \n 1:泓財內部系統（本行) \n 2:泓財（本行)");
+      const amount = prompt("請輸入應付金額：");
+
+      if (route == 1) {
+        initiatePayment({ reviewer: 'wbank', amount });
+      } else if (route == 2) {
+        const reviewer = prompt("請輸入收款人：");
+        initiatePayment({ reviewer, amount });
+      } else {
+        alert("輸入有誤");
+      }
+    }
+
+    function initiatePayment({ reviewer, amount }) {
+      socket.on('user_info', (data) => {
+        document.getElementById('user-info').textContent = '用戶: ' + data.username;
+      });
+
+      socket.on('payment_result', (data) => {
+        document.getElementById('payment-result').textContent = data.success ? '支付成功!' : '支付失敗,請重試。';
+      });
+
+      socket.emit('nfc_detected', {
+        username: '{{ user }}',
+        reviewer: reviewer,
+        amount: amount
+      });
+    }
+  </script>
+</body>
+</html>

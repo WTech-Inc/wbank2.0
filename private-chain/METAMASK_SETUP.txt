@@ -1,0 +1,18 @@
+
+=== MetaMask Network Config ===
+Network Name: WTC Private Chain
+RPC URL: http://223.18.36.147:8545
+Chain ID: 456789
+Currency Symbol: WTC
+Explorer: (none)
+
+=== Import Wallet ===
+WTC gas token: 0 gas (free)
+All accounts have unlimited WTC balance.
+
+=== Steps ===
+1. Open MetaMask ¡÷ Add Network
+2. RPC: http://223.18.36.147:8545
+3. Chain ID: 456789
+4. Switch to WTC Private Chain
+5. Import wallet using private key from E:\.env

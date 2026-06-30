@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>現代化介面</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            padding-bottom: 60px; /* 為頁底選單預留空間 */
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: hidden; /* 確保滑入的介面不會超出容器 */
+            position: relative; /* 允許子元素絕對定位 */
+        }
+
+        /* 初始內容區域 */
+        .current-view {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* 頁底選單 */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            color: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100; /* 確保選單在最上層 */
+        }
+
+        .bottom-nav a, .bottom-nav button {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .bottom-nav a:hover, .bottom-nav button:hover {
+            background-color: #555;
+        }
+
+        /* 新的介面樣式 */
+        .new-view {
+            position: absolute;
+            top: 0;
+            left: 100%; /* 初始位置在右側 */
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease-in-out; /* 滑動動畫效果 */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .new-view.active {
+            left: 0; /* 滑動到可見位置 */
+        }
+
+        .new-view-header {
+            background-color: #eee;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .back-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px 10px;
+            margin-right: auto; /* 將標題推向中間 */
+        }
+
+        .new-view-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin: 0 auto; /* 將標題置中 */
+        }
+
+        .new-view-content {
+            padding: 20px;
+            flex-grow: 1; /* 讓內容區域佔滿剩餘空間 */
+        }
+        /* 我的頁面專屬樣式 */
+.my-balance {
+    background-color: #ff8c00; /* 橙色 */
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    position: relative; /* 為按鈕定位 */
+    text-align: right; /* 餘額文字靠右 */
+}
+
+.balance-text {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.balance-actions button {
+    background-color: rgba(0, 0, 0, 0.3); /* 模糊背景 */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 10px;
+    position: absolute; /* 相對於 .my-balance 定位 */
+    bottom: 10px;
+    right: 10px;
+}
+
+.balance-actions button:hover {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.my-links {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.my-links a {
+    color: #333;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 16px;
+}
+
+.my-links a:hover {
+    text-decoration: underline;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="current-view" id="home-view">
+            <h2>首頁</h2>
+            <!-- Content -->
+            <p>這是首頁的內容。</p>
+        </div>
+
+        <div class="new-view" id="function1-view">
+            <div class="new-view-header">
+                <button class="back-button" data-target="function1-view">返回</button>
+                <h2 class="new-view-title">功能1</h2>
+                <div></div> </div>
+            <div class="new-view-content">
+                <p>這是功能1的內容。</p>
+            </div>
+        </div>
+
+        <div class="new-view" id="function2-view">
+            <div class="new-view-header">
+                <button class="back-button" data-target="function2-view">返回</button>
+                <h2 class="new-view-title">功能2</h2>
+                <div></div> </div>
+            <div class="new-view-content">
+                <p>這是功能2的內容。</p>
+            </div>
+        </div>
+
+        <div class="new-view" id="my-view">
+            <div class="new-view-header">
+                <button class="back-button" data-target="my-view">返回</button>
+                <h2 class="new-view-title">我的</h2>
+                <div></div> </div>
+            <div class="new-view-content">
+                <!-- Content -->
+                <div class="my-balance">
+                   <div class="balance-text">餘額：<span id="bal">0</span> 元</div>
+                      <div class="balance-actions">
+                         <button class="top-up">充值</button>
+                         <button class="withdraw">提現</button>
+                      </div>
+                   </div>
+                <div class="my-links">
+                   <a href="#">設置</a>
+                   <a href="#">登出</a>
+                </div>
+                <p>這是我的頁面內容的其他部分。</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- TopUp-view -->
+    <div class="new-view" id="topup-view" style="display: none;">
+        <!-- Content -->
+        <div class="new-view-header">
+                <button class="back-button" data-target="my-view">返回</button>
+                <h2 class="new-view-title">充值</h2>
+                <div></div> </div>
+            <div class="new-view-content">
+                <div style="margin-bottom: 20px;">
+                    <label for="topup-amount" style="display: block; margin-bottom: 5px;">充值金額：</label>
+                    <input type="number" id="topup-amount" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                </div>
+                <button id="topup-button" style="background-color: #007bff; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px;">確認充值</button>
+            </div>
+    </div>
+    <!-- WithDraw -->
+    <div class="new-view" id="withdraw-view" style="display: none;">
+    <div class="new-view-header">
+        <button class="back-button" data-target="my-view">返回</button>
+        <h2 class="new-view-title">提現</h2>
+        <div></div>
+    </div>
+    <div class="new-view-content">
+        <div style="margin-bottom: 15px;">
+            <label for="withdraw-amount" style="display: block; margin-bottom: 5px;">提現金額：</label>
+            <input type="number" id="withdraw-amount" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+            <label for="withdraw-method" style="display: block; margin-bottom: 5px;">收款方式：</label>
+            <select id="withdraw-method" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 5px;">
+                <option value="bank">銀行轉帳</option>
+                <option value="paypal">PayPal</option>
+                <option value="bitpay">BitPay</option>
+            </select>
+        </div>
+        <button id="withdraw-button" style="background-color: #28a745; color: white; border: none; padding: 12px 20px; border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 15px;">確認提現</button>
+        <div id="loading-bar-container" style="width: 100%; height: 10px; background-color: #f0f0f0; border-radius: 5px; overflow: hidden; display: none;">
+            <div id="loading-bar" style="width: 0%; height: 100%; background-color: #007bff; border-radius: 5px;"></div>
+        </div>
+    </div>
+</div>
+    <nav class="bottom-nav">
+        <button data-target="home-view">首頁</button>
+        <button data-target="function1-view">功能1</button>
+        <button data-target="function2-view">功能2</button>
+        <button data-target="my-view">我的</button>
+    </nav>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 顯示視圖的函數
+            function showView(viewId) {
+                $('.new-view').removeClass('active');
+                $('#home-view').toggle(viewId === 'home-view');
+                
+                const $view = $('#' + viewId);
+                $view.addClass('active');
+            }
+
+            // 返回按鈕的點擊事件
+            $('.back-button').on('click', function() {
+                const targetViewId = $(this).data('target');
+                $('#' + targetViewId).removeClass('active');
+                $('#home-view').show();
+            });
+
+            // 頁底選單按鈕的點擊事件
+            $('.bottom-nav button').on('click', function() {
+                const targetViewId = $(this).data('target');
+                showView(targetViewId);
+            });
+            // 顯示充值視圖
+    $('.balance-actions .top-up').on('click', function() {
+        $('#topup-view').addClass('active');
+    });
+
+    // 顯示提現視圖
+    $('.balance-actions .withdraw').on('click', function() {
+        ('#withdraw-view').addClass('active');
+    });
+
+    // 充值按鈕點擊事件
+    $('#topup-button').on('click', function() {
+        const amount = $('#topup-amount').val();
+        if (amount && parseFloat(amount) > 0) {
+            let currentBalance = parseFloat($('#bal').text()); // 取得目前的餘額（假設餘額顯示在元素的 text 中）
+            if (!isNaN(currentBalance)) {
+               currentBalance += amount;
+               $('#bal').text(currentBalance.toFixed(2)); // 更新頁面上的餘額，並保留兩位小數
+            }
+            alert(`成功充值 ${amount} 元！`);
+            $('#topup-amount').val(''); // 清空輸入框
+            $('.back-button[data-target="home-view"]').trigger('click'); // 返回我的頁面
+        } else {
+            alert('請輸入有效的充值金額。');
+        }
+    });
+
+    // 提現按鈕點擊事件
+    $('#withdraw-button').on('click', function() {
+        const amount = $('#withdraw-amount').val();
+        const method = $('#withdraw-method').val();
+        if (parseFloat($('#bal').text()) == 0) return;
+        if (amount && parseFloat(amount) > 0) {
+            // 顯示載入條
+            $('#loading-bar-container').show();
+            $('#loading-bar').css('width', '0%');
+
+            // 模擬載入過程
+            let progress = 0;
+            const interval = setInterval(function() {
+                progress += 10;
+                $('#loading-bar').css('width', progress + '%');
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    $('#loading-bar-container').hide();
+                    let currentBalance = parseFloat($('#bal').text()); // 取得目前的餘額（假設餘額顯示在元素的 text 中）
+                     if (!isNaN(currentBalance)) {
+                        currentBalance -= amount;
+                        $('#bal').text(currentBalance.toFixed(2)); // 更新頁面上的餘額，並保留兩位小數
+                     }
+                    alert(`成功提現 ${amount} 元，收款方式：${method}！`);
+                    $('#withdraw-amount').val(''); // 清空金額輸入框
+                    $('.back-button[data-target="home-view"]').trigger('click'); // 返回我的頁面
+                }
+            }, 300); // 模擬 3 秒的載入時間
+        } else {
+            alert('請輸入有效的提現金額。');
+        }
+    });
+            // 初始顯示首頁
+            showView('home-view');
+        });
+    </script>
+</body>
+</html>

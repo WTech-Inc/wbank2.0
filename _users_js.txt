@@ -1,0 +1,31 @@
+function loadUsers() {
+    const tb = document.getElementById('users-tbody');
+    tb.innerHTML = '<tr><td colspan="6" class="loading">載入中...</td></tr>';
+    fetch('/admin/api/users')
+        .then(r => r.json())
+        .then(users => {
+            if (!Array.isArray(users) || users.length === 0) {
+                tb.innerHTML = '<tr><td colspan="6" class="text-center">暫無用戶</td></tr>';
+                return;
+            }
+            tb.innerHTML = users.map(u => {
+                let badge = u.verify === 'yes' ? 'badge-success' : 'badge-warning';
+                let label = u.verify === 'yes' ? '已驗證' : '未驗證';
+                if (u.sub && u.sub.includes('凍結')) { badge = 'badge-danger'; label = '已凍結'; }
+                return `<tr class="user-row" data-username="${u.username}">
+                    <td>${u.username}</td>
+                    <td>WTC$${u.balance}</td>
+                    <td>${u.accnumber || '-'}</td>
+                    <td><span class="badge ${badge}">${label}</span></td>
+                    <td>${u.role || 'NonVerify'}</td>
+                    <td>
+                        <button class="btn btn-sm btn-success" onclick="verifyUser('${u.username}')">驗證</button>
+                        <button class="btn btn-sm btn-warning" onclick="toggleFreeze('${u.username}')">凍結/解凍</button>
+                        <button class="btn btn-sm btn-info" onclick="adjustBalance('${u.username}')">調整餘額</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        })
+        .catch(e => tb.innerHTML = `<tr><td colspan="6" class="text-center text-danger">錯誤: ${e.message}</td></tr>`);
+}
+
