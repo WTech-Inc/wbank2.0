@@ -1,3 +1,0 @@
-Traceback (most recent call last):
-  File "<string>", line 1, in <module>
-UnicodeDecodeError: 'cp950' codec can't decode byte 0x8e in position 204: illegal multibyte sequence
