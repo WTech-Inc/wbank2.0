@@ -12,7 +12,7 @@ time.sleep(2)
 
 # Start new server on ports 80 and 443 directly
 env = os.environ.copy()
-env['dataurl'] = 'postgresql://neondb_owner:npg_KP2Zat1YscBz@ep-cool-scene-a15ejn0l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
+env['dataurl'] = 'postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-cool-scene-a15ejn0l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
 env['HTTP_PORT'] = '80'
 env['HTTPS_PORT'] = '443'
 

@@ -287,7 +287,7 @@ class cashView(ModelView):
 try:
     conn = psycopg2.connect(
         database="neondb", user="neondb_owner",
-        password="npg_KP2Zat1YscBz",
+        password="YOUR_NEON_PASSWORD",
         host="ep-cool-scene-a15ejn0l-pooler.ap-southeast-1.aws.neon.tech",
         port=5432, sslmode="require"
     )

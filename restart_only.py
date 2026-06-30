@@ -25,7 +25,7 @@ else:
     with open('E:\\wbank\\start.bat', 'w') as f:
         f.write('@echo off\n')
         f.write('cd /d E:\\wbank\n')
-        f.write('set dataurl=postgresql://neondb_owner:npg_KP2Zat1YscBz@ep-cool-scene-a15ejn0l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require\n')
+        f.write('set dataurl=postgresql://neondb_owner:YOUR_NEON_PASSWORD@ep-cool-scene-a15ejn0l-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require\n')
         f.write('set HTTP_PORT=8080\n')
         f.write('set HTTPS_PORT=8443\n')
         f.write('start /B python main.py > run.log 2>&1\n')
